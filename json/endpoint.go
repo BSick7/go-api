@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"reflect"
 	"runtime"
+
+	"github.com/BSick7/go-api"
 )
 
-type EndpointHandler func(res *Responder, req *Request)
-
-func NewEndpoint(method string, path string, handler EndpointHandler) *Endpoint {
+func NewEndpoint(method string, path string, handler api.EndpointHandler) *Endpoint {
 	return &Endpoint{
 		method:      method,
 		path:        path,
@@ -22,7 +22,7 @@ type Endpoint struct {
 	method      string
 	path        string
 	handlerName string
-	handler     EndpointHandler
+	handler     api.EndpointHandler
 }
 
 func (e Endpoint) Method() string      { return e.method }
