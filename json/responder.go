@@ -10,13 +10,13 @@ import (
 )
 
 type Responder struct {
-	endpoint *Endpoint
+	endpoint Endpoint
 	encoder  *json.Encoder
 	w        http.ResponseWriter
 	req      *http.Request
 }
 
-func NewResponder(e *Endpoint, w http.ResponseWriter, r *http.Request) *Responder {
+func NewResponder(e Endpoint, w http.ResponseWriter, r *http.Request) *Responder {
 	encoder := json.NewEncoder(w)
 	prettyJson(r, encoder)
 	return &Responder{
