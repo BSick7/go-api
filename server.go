@@ -26,6 +26,10 @@ func (s *Server) Register(endpoints ...Endpoint) {
 	}
 }
 
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.router.ServeHTTP(w, r)
+}
+
 func (s *Server) useCtxValues(values context.Values) {
 	if values == nil {
 		return
