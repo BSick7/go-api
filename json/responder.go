@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Responder struct {
@@ -14,6 +15,7 @@ type Responder struct {
 	encoder  *json.Encoder
 	w        http.ResponseWriter
 	req      *http.Request
+	start    time.Time
 }
 
 func NewResponder(e Endpoint, w http.ResponseWriter, r *http.Request) *Responder {
@@ -24,6 +26,7 @@ func NewResponder(e Endpoint, w http.ResponseWriter, r *http.Request) *Responder
 		encoder:  encoder,
 		w:        w,
 		req:      r,
+		start:    time.Now(),
 	}
 }
 
@@ -52,7 +55,7 @@ func (r *Responder) logWithContext(code int, context ...string) {
 	if len(context) > 0 {
 		ctx = fmt.Sprintf(" %+v", context)
 	}
-	log.Printf("%d %s %s%s", code, r.req.RequestURI, r.endpoint, ctx)
+	log.Printf("%s %d %s %s%s", time.Since(r.start), code, r.req.RequestURI, r.endpoint, ctx)
 }
 
 func prettyJson(r *http.Request, encoder *json.Encoder) {
