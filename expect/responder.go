@@ -59,3 +59,7 @@ func (r *Responder) VerifyNotFound() {
 	}
 	r.hitNotFound = false
 }
+
+func (r *Responder) Status() (code int, ctx string) {
+	return r.want.StatusCode, ""
+}

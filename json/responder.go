@@ -3,7 +3,6 @@ package json
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,27 +10,26 @@ import (
 )
 
 type Responder struct {
-	endpoint Endpoint
-	encoder  *json.Encoder
-	w        http.ResponseWriter
-	req      *http.Request
-	start    time.Time
+	encoder    *json.Encoder
+	w          http.ResponseWriter
+	start      time.Time
+	statusCode int
+	statusCtx  []string
 }
 
 func NewResponder(e Endpoint, w http.ResponseWriter, r *http.Request) *Responder {
 	encoder := json.NewEncoder(w)
 	prettyJson(r, encoder)
 	return &Responder{
-		endpoint: e,
-		encoder:  encoder,
-		w:        w,
-		req:      r,
-		start:    time.Now(),
+		encoder: encoder,
+		w:       w,
+		start:   time.Now(),
 	}
 }
 
 func (r *Responder) SendError(statusCode int, err error, context ...string) {
-	r.logWithContext(statusCode, append(context, err.Error())...)
+	r.statusCode = statusCode
+	r.statusCtx = append(context, err.Error())
 	r.w.WriteHeader(statusCode)
 	r.encoder.Encode(map[string]interface{}{"error": err.Error()})
 }
@@ -42,20 +40,21 @@ func (r *Responder) SendNotFound(msg string, context ...string) {
 
 func (r *Responder) Send(data interface{}, context ...string) {
 	if data == nil {
-		r.logWithContext(http.StatusNoContent, context...)
+		r.statusCode = http.StatusNoContent
+		r.statusCtx = context
 		r.w.WriteHeader(http.StatusNoContent)
 	} else {
-		r.logWithContext(http.StatusOK, context...)
+		r.statusCode = http.StatusOK
+		r.statusCtx = context
 		r.encoder.Encode(data)
 	}
 }
 
-func (r *Responder) logWithContext(code int, context ...string) {
-	ctx := ""
-	if len(context) > 0 {
-		ctx = fmt.Sprintf(" %+v", context)
+func (r *Responder) Status() (code int, ctx string) {
+	if len(r.statusCtx) > 0 {
+		ctx = fmt.Sprintf(" %+v", r.statusCtx)
 	}
-	log.Printf("%s %d %s %s%s", time.Since(r.start), code, r.req.RequestURI, r.endpoint, ctx)
+	return r.statusCode, ctx
 }
 
 func prettyJson(r *http.Request, encoder *json.Encoder) {

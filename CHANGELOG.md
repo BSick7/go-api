@@ -1,3 +1,7 @@
+## 0.1.2 (May 18, 2018)
+
+  * Refactoring logging of request.
+
 ## 0.1.1 (May 18, 2018)
 
 FEATURES:
