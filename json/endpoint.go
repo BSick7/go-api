@@ -39,6 +39,7 @@ func (e Endpoint) String() string {
 func (e Endpoint) Handler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
+		w.Header().Set("Content-Type", "application/json")
 		res := NewResponder(e, w, r)
 		req := NewRequest(r)
 

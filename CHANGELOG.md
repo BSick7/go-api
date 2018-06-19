@@ -1,3 +1,7 @@
+## 0.1.3 (Jun 19, 2018)
+
+  * Fixed response header `Content-Type` to `application/json`.
+
 ## 0.1.2 (May 18, 2018)
 
   * Refactoring logging of request.
