@@ -12,11 +12,10 @@ type Server struct {
 	router *mux.Router
 }
 
-func NewServer(router *mux.Router, values context.Values) *Server {
+func NewServer(router *mux.Router) *Server {
 	s := &Server{
 		router: router,
 	}
-	s.useCtxValues(values)
 	return s
 }
 
@@ -30,13 +29,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
 
-func (s *Server) useCtxValues(values context.Values) {
-	if values == nil {
+func (s *Server) WrapContext(wrapper context.Wrapper) {
+	if wrapper == nil {
 		return
 	}
 	s.router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			newCtx := context.WithValues(r.Context(), values)
+			newCtx := wrapper(r.Context())
 			next.ServeHTTP(w, r.WithContext(newCtx))
 		})
 	})

@@ -1,3 +1,7 @@
+## 0.2.0 (Jul 27, 2018)
+
+  * Rebuilt api server contextual wrapping.
+
 ## 0.1.3 (Jun 19, 2018)
 
   * Fixed response header `Content-Type` to `application/json`.
