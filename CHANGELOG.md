@@ -1,3 +1,7 @@
+## 0.2.1 (Aug 11, 2018)
+
+  * Using t.Run to run tests.
+
 ## 0.2.0 (Jul 27, 2018)
 
   * Rebuilt api server contextual wrapping.

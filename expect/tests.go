@@ -2,7 +2,6 @@ package expect
 
 import (
 	gocontext "context"
-	"fmt"
 	"testing"
 
 	"github.com/BSick7/go-api"
@@ -10,6 +9,7 @@ import (
 )
 
 type Test struct {
+	Name       string
 	CtxWrapper context.Wrapper
 	Send       RequestData
 	Decoder    func(a interface{}, b interface{})
@@ -19,21 +19,23 @@ type Test struct {
 type Tests []Test
 
 func (tests Tests) Run(t *testing.T, handler api.EndpointHandler) {
-	for i, test := range tests {
-		ctx := gocontext.Background()
-		if test.CtxWrapper != nil {
-			ctx = test.CtxWrapper(ctx)
-		}
-		mreq := NewRequest(test.Send, ctx)
-		if test.Decoder != nil {
-			mreq.CopyPointer = test.Decoder
-		} else {
-			mreq.CopyPointer = func(a interface{}, b interface{}) {
-				t.Fatalf("[%d] test needs decoder mocked", i)
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			ctx := gocontext.Background()
+			if test.CtxWrapper != nil {
+				ctx = test.CtxWrapper(ctx)
 			}
-		}
-		mres := NewResponder(t, fmt.Sprintf("[%d] ", i), test.Want)
-		handler(mres, mreq)
-		mres.VerifyNotFound()
+			mreq := NewRequest(test.Send, ctx)
+			if test.Decoder != nil {
+				mreq.CopyPointer = test.Decoder
+			} else {
+				mreq.CopyPointer = func(a interface{}, b interface{}) {
+					t.Fatal("test needs decoder mocked")
+				}
+			}
+			mres := NewResponder(t, "", test.Want)
+			handler(mres, mreq)
+			mres.VerifyNotFound()
+		})
 	}
 }
