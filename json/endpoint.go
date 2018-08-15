@@ -28,6 +28,12 @@ type Endpoint struct {
 	path        string
 	handlerName string
 	handler     api.EndpointHandler
+	unlogged    bool
+}
+
+func (e *Endpoint) Unlogged() *Endpoint {
+	e.unlogged = true
+	return e
 }
 
 func (e Endpoint) Method() string      { return e.method }
@@ -46,6 +52,8 @@ func (e Endpoint) Handler() http.HandlerFunc {
 		e.handler(res, req)
 
 		statusCode, statusCtx := res.Status()
-		stdNoTime.Printf("%s %d %s %s%s", time.Since(start), statusCode, r.RequestURI, e, statusCtx)
+		if !e.unlogged {
+			stdNoTime.Printf("%s %d %s %s%s", time.Since(start), statusCode, r.RequestURI, e, statusCtx)
+		}
 	}
 }

@@ -1,3 +1,7 @@
+## 0.2.2 (Aug 15, 2018)
+
+  * Added ability to not log requests to an endpoint. Useful for health endpoints that are repeatedly hit.
+
 ## 0.2.1 (Aug 11, 2018)
 
   * Using t.Run to run tests.
