@@ -1,3 +1,7 @@
+## 0.2.4 (Sept 14, 2018)
+
+  * Added `Raw.Endpoint`, allowing a `http.HandlerFunc` to be used as an `Endpoint`. 
+
 ## 0.2.3 (Aug 20, 2018)
 
   * Added `Endpoints` with a helper `Print`.
