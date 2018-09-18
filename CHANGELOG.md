@@ -1,4 +1,8 @@
-## 0.2.4 (Sept 14, 2018)
+## 0.2.5 (Sep 18, 2018)
+
+  * Added support for reading query string from request.
+
+## 0.2.4 (Sep 14, 2018)
 
   * Added `Raw.Endpoint`, allowing a `http.HandlerFunc` to be used as an `Endpoint`. 
 

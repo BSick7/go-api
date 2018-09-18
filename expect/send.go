@@ -2,6 +2,7 @@ package expect
 
 type RequestData struct {
 	Vars      map[string]string
+	Query     map[string]string
 	Body      interface{}
 	DecodeErr string
 }
