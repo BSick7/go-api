@@ -22,6 +22,10 @@ func (r *Request) Var(key string) string {
 	return r.Data.Vars[key]
 }
 
+func (r *Request) Query(key string) string {
+	return r.Data.Query[key]
+}
+
 func (r *Request) DecodeBody(v interface{}) error {
 	r.CopyPointer(v, r.Data.Body)
 	if r.Data.DecodeErr != "" {

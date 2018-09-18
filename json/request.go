@@ -26,6 +26,10 @@ func (r *Request) Var(key string) string {
 	return r.vars[key]
 }
 
+func (r *Request) Query(key string) string {
+	return r.req.URL.Query().Get(key)
+}
+
 func (r *Request) DecodeBody(v interface{}) error {
 	decoder := json.NewDecoder(r.req.Body)
 	err := decoder.Decode(v)
