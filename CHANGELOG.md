@@ -1,5 +1,6 @@
-## 0.3.0 (Unreleased)
+## 0.3.0 (Oct 16, 2018)
 
+  * BREAKING: Removed `Unlogged()` from endpoints.
   * Added support for middleware
   * Added endpoint logger to migrate endpoint logging to middleware.
 
