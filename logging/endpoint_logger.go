@@ -9,9 +9,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var stdNoTime = log.New(os.Stderr, "", 0)
-
 type EndpointLoggerConfig struct {
+	// Prefix is prepended to all log statements
+	Prefix string
+
 	// LogInitial will determine whether to log an API endpoint it is executed
 	LogInitial bool
 
@@ -51,6 +52,8 @@ func (c EndpointLoggerConfig) ShouldLog(statusCode int) bool {
 }
 
 func EndpointLoggerMiddleware(cfg EndpointLoggerConfig) mux.MiddlewareFunc {
+	var stdNoTime = log.New(os.Stderr, cfg.Prefix, 0)
+
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
