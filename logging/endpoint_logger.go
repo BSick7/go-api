@@ -27,7 +27,7 @@ type EndpointLoggerConfig struct {
 	// Log400s will determine whether an HTTP 4xx response is logged
 	Log400s bool
 
-	// Log400s will determine whether an HTTP 4xx response is logged
+	// Log500s will determine whether an HTTP 5xx response is logged
 	Log500s bool
 }
 
