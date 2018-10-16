@@ -41,6 +41,10 @@ func (s *Server) WrapContext(wrapper context.Wrapper) {
 	})
 }
 
+func (s *Server) AttachMiddleware(mwf mux.MiddlewareFunc) {
+	s.router.Use(mwf)
+}
+
 func (s *Server) registerSingle(ep Endpoint) {
 	handler := ep.Handler()
 

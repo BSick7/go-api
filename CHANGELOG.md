@@ -1,3 +1,9 @@
+## 0.3.0 (Oct 16, 2018)
+
+  * BREAKING: Removed `Unlogged()` from endpoints.
+  * Added support for middleware
+  * Added endpoint logger to migrate endpoint logging to middleware.
+
 ## 0.2.5 (Sep 18, 2018)
 
   * Added support for reading query string from request.
