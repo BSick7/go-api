@@ -61,7 +61,7 @@ func EndpointLoggerMiddleware(cfg EndpointLoggerConfig) mux.MiddlewareFunc {
 			if cfg.LogInitial {
 				stdNoTime.Printf("%s %s", r.Method, r.RequestURI)
 			}
-			handler.ServeHTTP(w, r)
+			handler.ServeHTTP(wrapped, r)
 			if wrapped.statusCode == nil {
 				stdNoTime.Printf("%s xxx %s %s%s", time.Since(start), r.Method, r.RequestURI, wrapped.ctx)
 			} else if cfg.ShouldLog(*wrapped.statusCode) {
