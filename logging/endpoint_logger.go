@@ -52,20 +52,18 @@ func (c EndpointLoggerConfig) ShouldLog(statusCode int) bool {
 }
 
 func EndpointLoggerMiddleware(cfg EndpointLoggerConfig) mux.MiddlewareFunc {
-	var stdNoTime = log.New(os.Stderr, cfg.Prefix, 0)
+	stdNoTime := log.New(os.Stderr, cfg.Prefix, 0)
 
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
-			wrapped := &endpointLoggerWriterWrapper{ResponseWriter: w}
+			wrapped := &endpointLoggerWriterWrapper{ResponseWriter: w, statusCode: http.StatusOK}
 			if cfg.LogInitial {
 				stdNoTime.Printf("%s %s", r.Method, r.RequestURI)
 			}
 			handler.ServeHTTP(wrapped, r)
-			if wrapped.statusCode == nil {
-				stdNoTime.Printf("%s xxx %s %s%s", time.Since(start), r.Method, r.RequestURI, wrapped.ctx)
-			} else if cfg.ShouldLog(*wrapped.statusCode) {
-				stdNoTime.Printf("%s %d %s %s%s", time.Since(start), *wrapped.statusCode, r.Method, r.RequestURI, wrapped.ctx)
+			if cfg.ShouldLog(wrapped.statusCode) {
+				stdNoTime.Printf("%s %d %s %s%s", time.Since(start), wrapped.statusCode, r.Method, r.RequestURI, wrapped.ctx)
 			}
 		})
 	}
@@ -78,7 +76,7 @@ type ResponseContextWriter interface {
 
 type endpointLoggerWriterWrapper struct {
 	http.ResponseWriter
-	statusCode *int
+	statusCode int
 	ctx        string
 }
 
@@ -91,7 +89,7 @@ func (w *endpointLoggerWriterWrapper) Write(data []byte) (int, error) {
 }
 
 func (w *endpointLoggerWriterWrapper) WriteHeader(statusCode int) {
-	w.statusCode = &statusCode
+	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
