@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/BSick7/go-api/context"
+	"github.com/BishopFox/go-api/context"
 	"github.com/gorilla/mux"
 )
 

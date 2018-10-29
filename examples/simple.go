@@ -2,9 +2,10 @@ package examples
 
 import (
 	"fmt"
-	"github.com/BSick7/go-api"
 	"net/http"
 	"strconv"
+
+	"github.com/BishopFox/go-api"
 )
 
 func Simple(res api.Responder, req api.Request) {

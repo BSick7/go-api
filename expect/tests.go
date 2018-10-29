@@ -4,8 +4,8 @@ import (
 	gocontext "context"
 	"testing"
 
-	"github.com/BSick7/go-api"
-	"github.com/BSick7/go-api/context"
+	"github.com/BishopFox/go-api"
+	"github.com/BishopFox/go-api/context"
 )
 
 type Test struct {

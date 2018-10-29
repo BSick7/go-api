@@ -3,9 +3,9 @@ package api_test
 import (
 	"testing"
 
-	"github.com/BSick7/go-api"
-	"github.com/BSick7/go-api/json"
-	"github.com/BSick7/go-api/logging"
+	"github.com/BishopFox/go-api"
+	"github.com/BishopFox/go-api/json"
+	"github.com/BishopFox/go-api/logging"
 	"github.com/gorilla/mux"
 )
 

@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/BSick7/go-api"
-	"github.com/BSick7/go-api/logging"
+	"github.com/BishopFox/go-api"
+	"github.com/BishopFox/go-api/logging"
 )
 
 func NewEndpoint(method string, path string, handler api.EndpointHandler) *Endpoint {
