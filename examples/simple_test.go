@@ -3,7 +3,7 @@ package examples
 import (
 	"testing"
 
-	"github.com/BSick7/go-api/expect"
+	"github.com/BishopFox/go-api/expect"
 )
 
 func TestSimple(t *testing.T) {
