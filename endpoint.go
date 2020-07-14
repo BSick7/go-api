@@ -1,15 +1,13 @@
 package api
 
 import (
-	"net/http"
+	"github.com/gorilla/mux"
 )
 
 type Endpoint interface {
-	Method() string
-	Path() string
-	HandlerName() string
-	String() string
-	Handler() http.HandlerFunc
-}
+	// Identifier provides identification in logs
+	Identifier() string
 
-type EndpointHandler func(res Responder, req Request)
+	// Register is responsible for registering this endpoint with a gorilla router
+	Register(router *mux.Router)
+}

@@ -1,3 +1,9 @@
+## 0.4.0 (Jul 14, 2020)
+
+  * Rebuilt entire library to be simpler and not obscure golang http constructs.
+  * Added `gzip`, `recovery` middleware
+  * Added `options` endpoint
+
 ## 0.3.0 (Oct 16, 2018)
 
   * BREAKING: Removed `Unlogged()` from endpoints.

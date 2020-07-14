@@ -1,7 +1,6 @@
 package json
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,35 +9,22 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func NewRequest(req *http.Request) *Request {
-	return &Request{
-		req:  req,
-		vars: mux.Vars(req),
-	}
-}
-
 type Request struct {
-	req  *http.Request
-	vars map[string]string
+	*http.Request
 }
 
 func (r *Request) Var(key string) string {
-	return r.vars[key]
-}
-
-func (r *Request) Query(key string) string {
-	return r.req.URL.Query().Get(key)
+	if v := mux.Vars(r.Request); v != nil {
+		return v[key]
+	}
+	return ""
 }
 
 func (r *Request) DecodeBody(v interface{}) error {
-	decoder := json.NewDecoder(r.req.Body)
+	decoder := json.NewDecoder(r.Request.Body)
 	err := decoder.Decode(v)
 	if err == io.EOF {
 		return fmt.Errorf("missing body content")
 	}
 	return err
-}
-
-func (r *Request) Context() context.Context {
-	return r.req.Context()
 }

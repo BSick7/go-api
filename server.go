@@ -1,62 +1,46 @@
 package api
 
 import (
+	"fmt"
+	"log"
 	"net/http"
-	"strings"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/BishopFox/go-api/context"
 	"github.com/gorilla/mux"
 )
 
 type Server struct {
-	router *mux.Router
-}
-
-func NewServer(router *mux.Router) *Server {
-	s := &Server{
-		router: router,
-	}
-	return s
+	*mux.Router
 }
 
 func (s *Server) Register(endpoints ...Endpoint) {
 	for _, endpoint := range endpoints {
-		s.registerSingle(endpoint)
+		endpoint.Register(s.Router)
 	}
 }
 
-func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.router.ServeHTTP(w, r)
-}
-
-func (s *Server) WrapContext(wrapper context.Wrapper) {
-	if wrapper == nil {
-		return
+func (s *Server) Launch(port int, cancelFn func()) error {
+	server := &http.Server{
+		Addr:         fmt.Sprintf(":%d", port),
+		WriteTimeout: time.Duration(30) * time.Second,
+		ReadTimeout:  time.Duration(30) * time.Second,
+		ErrorLog:     log.New(os.Stdout, "[http-server] ", 0),
+		Handler:      s,
 	}
-	s.router.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			newCtx := wrapper(r.Context())
-			next.ServeHTTP(w, r.WithContext(newCtx))
-		})
-	})
-}
+	term := make(chan os.Signal, 1)
+	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		sig := <-term
+		server.ErrorLog.Printf("received %s, shutting down...\n", sig)
+		if err := server.Close(); err != nil {
+			server.ErrorLog.Printf("server did not fully close: %s\n", err)
+		}
+		cancelFn()
+	}()
 
-func (s *Server) AttachMiddleware(mwf mux.MiddlewareFunc) {
-	s.router.Use(mwf)
-}
-
-func (s *Server) registerSingle(ep Endpoint) {
-	handler := ep.Handler()
-
-	cleanPath := strings.TrimSuffix(ep.Path(), "/")
-
-	// First registration matches without a trailing slash
-	s.router.Methods(ep.Method()).
-		Path(cleanPath).
-		HandlerFunc(handler)
-
-	// Second registration matches with a trailing slash
-	s.router.Methods(ep.Method()).
-		Path(cleanPath + "/").
-		HandlerFunc(handler)
+	server.ErrorLog.Printf("listening on :%d\n", port)
+	return server.ListenAndServe()
 }
