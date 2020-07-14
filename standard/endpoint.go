@@ -10,6 +10,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func NewEndpoint(method string, path string, handler http.Handler) Endpoint {
+	return Endpoint{
+		Method:  method,
+		Path:    path,
+		Handler: handler,
+	}
+}
+
 type Endpoint struct {
 	Method      string
 	Path        string

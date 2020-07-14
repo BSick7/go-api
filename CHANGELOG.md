@@ -1,3 +1,7 @@
+## 0.4.1 (Jul 14, 2020)
+
+  * Added `standard.NewEnpoint` helper to make concise syntax.
+
 ## 0.4.0 (Jul 14, 2020)
 
   * Rebuilt entire library to be simpler and not obscure golang http constructs.
