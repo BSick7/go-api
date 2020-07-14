@@ -6,7 +6,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-
 const DefaultAllowOrigin = "*"
 const DefaultAllowMethods = "DELETE, GET, OPTIONS, POST, PUT"
 const DefaultAllowHeaders = "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With"
@@ -34,7 +33,7 @@ type Endpoint struct {
 	allowHeaders string
 }
 
-func (e Endpoint) Description() string {
+func (e Endpoint) Identifier() string {
 	return "/*\tOPTIONS%s\tOptions"
 }
 

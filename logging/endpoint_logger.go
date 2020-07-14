@@ -9,12 +9,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type EndpointLoggerConfig struct {
+type Config struct {
 	// Prefix is prepended to all log statements
 	Prefix string
-
-	// LogInitial will determine whether to log an API endpoint it is executed
-	LogInitial bool
 
 	// Log100s will determine whether an HTTP 1xx response is logged
 	Log100s bool
@@ -32,7 +29,7 @@ type EndpointLoggerConfig struct {
 	Log500s bool
 }
 
-func (c EndpointLoggerConfig) ShouldLog(statusCode int) bool {
+func (c Config) ShouldLog(statusCode int) bool {
 	if statusCode >= 100 && statusCode < 200 {
 		return c.Log100s
 	}
@@ -51,27 +48,19 @@ func (c EndpointLoggerConfig) ShouldLog(statusCode int) bool {
 	return false
 }
 
-func EndpointLoggerMiddleware(cfg EndpointLoggerConfig) mux.MiddlewareFunc {
+func EndpointLoggerMiddleware(cfg Config) mux.MiddlewareFunc {
 	stdNoTime := log.New(os.Stderr, cfg.Prefix, 0)
 
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			wrapped := &endpointLoggerWriterWrapper{ResponseWriter: w, statusCode: http.StatusOK}
-			if cfg.LogInitial {
-				stdNoTime.Printf("%s %s", r.Method, r.RequestURI)
-			}
 			handler.ServeHTTP(wrapped, r)
 			if cfg.ShouldLog(wrapped.statusCode) {
 				stdNoTime.Printf("%s %d %s %s%s", time.Since(start), wrapped.statusCode, r.Method, r.RequestURI, wrapped.ctx)
 			}
 		})
 	}
-}
-
-type ResponseContextWriter interface {
-	http.ResponseWriter
-	WriteContext(ctx string)
 }
 
 type endpointLoggerWriterWrapper struct {
@@ -91,8 +80,4 @@ func (w *endpointLoggerWriterWrapper) Write(data []byte) (int, error) {
 func (w *endpointLoggerWriterWrapper) WriteHeader(statusCode int) {
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
-}
-
-func (w *endpointLoggerWriterWrapper) WriteContext(ctx string) {
-	w.ctx = ctx
 }
