@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -35,12 +36,18 @@ func (s *Server) Launch(port int, cancelFn func()) error {
 	go func() {
 		sig := <-term
 		server.ErrorLog.Printf("received %s, shutting down...\n", sig)
-		if err := server.Close(); err != nil {
-			server.ErrorLog.Printf("server did not fully close: %s\n", err)
-		}
 		cancelFn()
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		if err := server.Shutdown(ctx); err != nil {
+			server.ErrorLog.Printf("server did not shut down: %s\n", err)
+		}
 	}()
 
 	server.ErrorLog.Printf("listening on :%d\n", port)
-	return server.ListenAndServe()
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		return err
+	}
+	server.ErrorLog.Printf("server shut down")
+	return nil
 }
