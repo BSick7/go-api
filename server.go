@@ -15,12 +15,23 @@ import (
 
 type Server struct {
 	*mux.Router
+	Middlewares []mux.MiddlewareFunc
 }
 
 func (s *Server) Register(endpoints ...Endpoint) {
 	for _, endpoint := range endpoints {
 		endpoint.Register(s.Router)
 	}
+}
+
+// Use registers middleware on the mux router
+// These middlewares are chained in the order they are registered
+// If middleware A is registered early than B, then execution will be A => B => route handler
+// By default, middlewares are not executed for NotFound or MethodNotAllowed as detected by router
+// In order to use middlewares, utilize api.MiddlewaresHandler to wrap a raw handler with these middlewares
+func (s *Server) Use(mwf ...mux.MiddlewareFunc) {
+	s.Middlewares = append(s.Middlewares, mwf...)
+	s.Router.Use(mwf...)
 }
 
 func (s *Server) Launch(port int, cancelFn func()) error {

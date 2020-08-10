@@ -26,6 +26,7 @@ func Server() *api.Server {
 			SkipClean(true).
 			UseEncodedPath(),
 	}
+	api.DefaultFallbackBehavior(apiServer)
 	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(gzip.Middleware())
 	apiServer.Use(logging.EndpointLoggerMiddleware(loggingCfg))
