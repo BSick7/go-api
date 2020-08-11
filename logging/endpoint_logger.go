@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -57,7 +58,7 @@ func EndpointLoggerMiddleware(cfg Config) mux.MiddlewareFunc {
 			wrapped := &endpointLoggerWriterWrapper{ResponseWriter: w, statusCode: http.StatusOK}
 			handler.ServeHTTP(wrapped, r)
 			if cfg.ShouldLog(wrapped.statusCode) {
-				stdNoTime.Printf("%s %d %s %s%s", time.Since(start), wrapped.statusCode, r.Method, r.RequestURI, wrapped.ctx)
+				stdNoTime.Printf("%s %d %s %s %s", time.Since(start), wrapped.statusCode, r.Method, r.RequestURI, strings.Join(wrapped.capturedData, ""))
 			}
 		})
 	}
@@ -65,8 +66,8 @@ func EndpointLoggerMiddleware(cfg Config) mux.MiddlewareFunc {
 
 type endpointLoggerWriterWrapper struct {
 	http.ResponseWriter
-	statusCode int
-	ctx        string
+	statusCode   int
+	capturedData []string
 }
 
 func (w *endpointLoggerWriterWrapper) Header() http.Header {
@@ -74,6 +75,9 @@ func (w *endpointLoggerWriterWrapper) Header() http.Header {
 }
 
 func (w *endpointLoggerWriterWrapper) Write(data []byte) (int, error) {
+	if w.statusCode >= 400 {
+		w.capturedData = append(w.capturedData, string(data))
+	}
 	return w.ResponseWriter.Write(data)
 }
 

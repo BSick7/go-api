@@ -1,3 +1,7 @@
+## 0.4.3 (Aug 10, 2020)
+
+* Amended endpoint logger to log outgoing data for 4xx, 5xx responses
+
 ## 0.4.2 (Aug 10, 2020)
 
 * Providing default CORS setup that works properly
