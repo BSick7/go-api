@@ -6,10 +6,14 @@ import (
 )
 
 func Middleware(settings Settings) mux.MiddlewareFunc {
-	return handlers.CORS(
+	opts := []handlers.CORSOption{
 		handlers.AllowedOrigins(settings.AllowedOrigins),
 		handlers.AllowedHeaders(settings.AllowedHeaders),
 		handlers.AllowedMethods(settings.AllowedMethods),
 		handlers.ExposedHeaders(settings.ExposedHeaders),
-	)
+	}
+	if settings.AllowCredentials {
+		opts = append(opts, handlers.AllowCredentials())
+	}
+	return handlers.CORS(opts...)
 }

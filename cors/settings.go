@@ -14,12 +14,14 @@ var DefaultSettings = Settings{
 		"Cache-Control",
 		"X-Requested-With",
 	},
-	ExposedHeaders: []string{"Content-Range"},
+	ExposedHeaders:   []string{"Content-Range"},
+	AllowCredentials: true,
 }
 
 type Settings struct {
-	AllowedOrigins []string
-	AllowedMethods []string
-	AllowedHeaders []string
-	ExposedHeaders []string
+	AllowedOrigins   []string
+	AllowedMethods   []string
+	AllowedHeaders   []string
+	ExposedHeaders   []string
+	AllowCredentials bool
 }

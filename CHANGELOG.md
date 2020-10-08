@@ -1,3 +1,8 @@
+## 0.5.0 (Oct 08, 2020)
+
+* Added support for `Access-Control-Allow-Credentials` for cors middleware.
+  * By default, this is set to `true`
+
 ## 0.4.3 (Aug 10, 2020)
 
 * Amended endpoint logger to log outgoing data for 4xx, 5xx responses
