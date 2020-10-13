@@ -1,3 +1,7 @@
+## 0.5.1 (Oct 13, 2020)
+
+* Added `auth` package with `AuthenticateMiddleware` and `AuthorizeMiddleware`.
+
 ## 0.5.0 (Oct 08, 2020)
 
 * Added support for `Access-Control-Allow-Credentials` for cors middleware.
