@@ -1,4 +1,4 @@
-## 0.5.1 (Oct 13, 2020)
+## 0.5.2 (Oct 13, 2020)
 
 * Added `auth` package with `AuthenticateMiddleware` and `AuthorizeMiddleware`.
 
