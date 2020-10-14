@@ -1,3 +1,7 @@
+## 0.5.3 (Oct 14, 2020)
+
+* Fixed bug in `AuthenticateMiddleware` prohibiting upstream proxying when error occurs.
+
 ## 0.5.2 (Oct 13, 2020)
 
 * Added `auth` package with `AuthenticateMiddleware` and `AuthorizeMiddleware`.

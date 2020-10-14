@@ -20,6 +20,7 @@ func AuthenticateMiddleware(authenticate Authenticator) mux.MiddlewareFunc {
 				log.Println(fmt.Sprintf("unauthenticated: %s", err))
 				w.WriteHeader(http.StatusUnauthorized)
 				w.Write([]byte(`Unauthenticated`))
+				return
 			}
 
 			next.ServeHTTP(w, newRequest)
