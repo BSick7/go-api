@@ -1,3 +1,7 @@
+## 0.5.4 (Nov 20, 2020)
+
+* Added `EndpointGroup` to locate several endpoints under a single prefixed path.
+
 ## 0.5.3 (Oct 14, 2020)
 
 * Fixed bug in `AuthenticateMiddleware` prohibiting upstream proxying when error occurs.
