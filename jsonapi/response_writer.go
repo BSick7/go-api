@@ -15,6 +15,23 @@ type ResponseWriter struct {
 	statusCode int
 }
 
+// SendErrorIfJsonApiError will respond to the request if the input err is a jsonapi.ErrorObject
+func (r *ResponseWriter) SendErrorIfJsonApiError(err error) bool {
+	jaerr, ok := err.(*jsonapi.ErrorObject)
+	if !ok {
+		return false
+	}
+	statusCode, _ := strconv.Atoi(jaerr.Code)
+	r.statusCode = statusCode
+	r.ResponseWriter.WriteHeader(statusCode)
+
+	if err := jsonapi.MarshalPayload(r.ResponseWriter, jaerr); err != nil {
+		r.statusCode = http.StatusInternalServerError
+		http.Error(r.ResponseWriter, err.Error(), http.StatusInternalServerError)
+	}
+	return true
+}
+
 func (r *ResponseWriter) SendError(id string, statusCode int, title string, err error) {
 	r.statusCode = statusCode
 	r.ResponseWriter.WriteHeader(statusCode)
