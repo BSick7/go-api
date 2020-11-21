@@ -18,7 +18,7 @@ func (e EndpointGroup) Identifier() string {
 }
 
 func (e EndpointGroup) Register(router *mux.Router) {
-	subrouter := router.Path(e.Prefix).Subrouter()
+	subrouter := router.PathPrefix(e.Prefix).Subrouter()
 	for _, endpoint := range e.Endpoints {
 		endpoint.Register(subrouter)
 	}

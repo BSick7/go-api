@@ -1,3 +1,7 @@
+## 0.5.5 (Nov 21, 2020)
+
+* Fixed `EndpointGroup` prefix.
+
 ## 0.5.4 (Nov 20, 2020)
 
 * Added `EndpointGroup` to locate several endpoints under a single prefixed path.
