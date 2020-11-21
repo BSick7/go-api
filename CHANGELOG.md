@@ -1,3 +1,7 @@
+## 0.6.0 (Nov 21, 2020)
+
+* Add `jsonapi` package to support JSONAPI.
+
 ## 0.5.5 (Nov 21, 2020)
 
 * Fixed `EndpointGroup` prefix.
