@@ -49,7 +49,7 @@ func (r *Request) Pagination() (*Pagination, error) {
 }
 
 func (r *Request) parseQueryParamPositiveInt(param string) (*int, error) {
-	num, err := r.parseQueryParamPositiveInt(param)
+	num, err := r.parseQueryParamInt(param)
 	if err != nil {
 		return nil, err
 	}

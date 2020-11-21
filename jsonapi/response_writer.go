@@ -36,7 +36,7 @@ func (r *ResponseWriter) SendError(id string, statusCode int, title string, err 
 	r.statusCode = statusCode
 	r.ResponseWriter.WriteHeader(statusCode)
 
-	errObject := jsonapi.ErrorObject{
+	errObject := &jsonapi.ErrorObject{
 		ID:     id,
 		Title:  title,
 		Detail: err.Error(),
