@@ -9,5 +9,6 @@ require (
 	github.com/klauspost/compress v1.10.10 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0 // indirect
+	github.com/svanharmelen/jsonapi v0.0.0-20180618144545-0c0828c3f16d
 	github.com/xi2/httpgzip v0.0.0-20190509075255-932ab5e254ae
 )
