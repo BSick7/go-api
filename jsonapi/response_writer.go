@@ -2,6 +2,7 @@ package jsonapi
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,40 +16,34 @@ type ResponseWriter struct {
 	statusCode int
 }
 
-// SendErrorIfJsonApiError will respond to the request if the input err is a jsonapi.ErrorObject
-func (r *ResponseWriter) SendErrorIfJsonApiError(err error) bool {
-	jaerr, ok := err.(*jsonapi.ErrorObject)
-	if !ok {
-		return false
+func (r *ResponseWriter) SendJsonApiErrors(errs []*jsonapi.ErrorObject) {
+	if len(errs) < 1 {
+		return
 	}
-	statusCode, _ := strconv.Atoi(jaerr.Code)
-	r.statusCode = statusCode
-	r.ResponseWriter.WriteHeader(statusCode)
 
-	if err := jsonapi.MarshalPayload(r.ResponseWriter, jaerr); err != nil {
+	statusCode, _ := strconv.Atoi(errs[0].Code)
+	r.statusCode = statusCode
+	r.WriteHeader(statusCode)
+
+	if err := jsonapi.MarshalErrors(r, errs); err != nil {
+		log.Printf("error marshaling jsonapi errors to response: %s (%+v)", err, errs)
 		r.statusCode = http.StatusInternalServerError
-		http.Error(r.ResponseWriter, err.Error(), http.StatusInternalServerError)
+		http.Error(r, err.Error(), http.StatusInternalServerError)
 	}
-	return true
+}
+
+func (r *ResponseWriter) SendJsonApiError(err *jsonapi.ErrorObject) {
+	r.SendJsonApiErrors([]*jsonapi.ErrorObject{err})
 }
 
 func (r *ResponseWriter) SendError(id string, statusCode int, title string, err error) {
-	r.statusCode = statusCode
-	r.ResponseWriter.WriteHeader(statusCode)
-
-	errObject := &jsonapi.ErrorObject{
+	r.SendJsonApiError(&jsonapi.ErrorObject{
 		ID:     id,
 		Title:  title,
 		Detail: err.Error(),
 		Status: http.StatusText(statusCode),
 		Code:   strconv.Itoa(statusCode),
-		Meta:   nil,
-	}
-
-	if err := jsonapi.MarshalPayload(r.ResponseWriter, errObject); err != nil {
-		r.statusCode = http.StatusInternalServerError
-		http.Error(r.ResponseWriter, err.Error(), http.StatusInternalServerError)
-	}
+	})
 }
 
 func (r *ResponseWriter) SendNotFound(id string, msg string) {

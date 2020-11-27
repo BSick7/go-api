@@ -29,31 +29,36 @@ func (r *Request) DecodeBody(v interface{}) error {
 	return err
 }
 
-func (r *Request) Pagination() (*Pagination, error) {
+func (r *Request) Pagination() (*Pagination, []*jsonapi.ErrorObject) {
 	p := &Pagination{}
 
-	var err error
+	errs := make([]*jsonapi.ErrorObject, 0)
+	var err *jsonapi.ErrorObject
 	if p.Limit, err = r.parseQueryParamPositiveInt(jsonapi.QueryParamPageLimit); err != nil {
-		return nil, err
+		errs = append(errs, err)
 	}
 	if p.Offset, err = r.parseQueryParamPositiveInt(jsonapi.QueryParamPageOffset); err != nil {
-		return nil, err
+		errs = append(errs, err)
 	}
 	if p.Size, err = r.parseQueryParamPositiveInt(jsonapi.QueryParamPageSize); err != nil {
-		return nil, err
+		errs = append(errs, err)
 	}
 	if p.Number, err = r.parseQueryParamPositiveInt(jsonapi.QueryParamPageNumber); err != nil {
-		return nil, err
+		errs = append(errs, err)
+	}
+	if len(errs) > 0 {
+		return nil, errs
 	}
 	return p, nil
 }
 
-func (r *Request) parseQueryParamPositiveInt(param string) (*int, error) {
-	num, err := r.parseQueryParamInt(param)
-	if err != nil {
-		return nil, err
+func (r *Request) parseQueryParamPositiveInt(param string) (*int, *jsonapi.ErrorObject) {
+	val := r.URL.Query().Get(param)
+	if val == "" {
+		return nil, nil
 	}
-	if num != nil && *num < 0 {
+	num, err := strconv.Atoi(val)
+	if err != nil {
 		return nil, &jsonapi.ErrorObject{
 			Title:  "Invalid Parameter.",
 			Detail: fmt.Sprintf("%s must be a positive integer", param),
@@ -61,17 +66,13 @@ func (r *Request) parseQueryParamPositiveInt(param string) (*int, error) {
 			Code:   strconv.Itoa(http.StatusBadRequest),
 		}
 	}
-	return num, nil
-}
-
-func (r *Request) parseQueryParamInt(param string) (*int, error) {
-	val := r.URL.Query().Get(param)
-	if val == "" {
-		return nil, nil
+	if num < 0 {
+		return nil, &jsonapi.ErrorObject{
+			Title:  "Invalid Parameter.",
+			Detail: fmt.Sprintf("%s must be a positive integer", param),
+			Status: http.StatusText(http.StatusBadRequest),
+			Code:   strconv.Itoa(http.StatusBadRequest),
+		}
 	}
-	limit, err := strconv.Atoi(val)
-	if err != nil {
-		return nil, err
-	}
-	return &limit, nil
+	return &num, nil
 }

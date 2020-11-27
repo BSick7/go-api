@@ -1,4 +1,8 @@
-## 0.6.1. (Nov 21, 2020)
+## 0.6.2 (Nov 27, 2020)
+
+* Fixed emission of errors through `jsonapi` interfaces.
+
+## 0.6.1 (Nov 21, 2020)
 
 * Added `jwt.Middleware()` to parse, but not verify incoming jwt token in `Authorization` header as `Bearer` token.
 
