@@ -3,6 +3,7 @@ package app1
 import (
 	"github.com/BSick7/go-api"
 	"github.com/BSick7/go-api/cors"
+	"github.com/BSick7/go-api/errors"
 	"github.com/BSick7/go-api/gzip"
 	"github.com/BSick7/go-api/json"
 	"github.com/BSick7/go-api/logging"
@@ -28,9 +29,10 @@ func Server() *api.Server {
 			UseEncodedPath(),
 	}
 	api.DefaultFallbackBehavior(apiServer)
-	apiServer.Use(recovery.PanicMiddleware())
-	apiServer.Use(gzip.Middleware())
 	apiServer.Use(logging.EndpointLoggerMiddleware(loggingCfg))
+	apiServer.Use(gzip.Middleware())
+	apiServer.Use(errors.ReporterMiddleware())
+	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
 	apiServer.Register(endpoints...)
 	apiServer.Register(cors.Preflight())
