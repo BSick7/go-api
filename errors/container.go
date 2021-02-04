@@ -5,11 +5,15 @@ import (
 )
 
 type Container struct {
-	Error error
+	Errors []error
 }
 
 func (c *Container) AddError(err error) {
-
+	if c.Errors == nil {
+		c.Errors = []error{err}
+	} else {
+		c.Errors = append(c.Errors, err)
+	}
 }
 
 type containerContextKey struct{}
