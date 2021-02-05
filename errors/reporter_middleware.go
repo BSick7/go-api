@@ -6,12 +6,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ReporterMiddleware() mux.MiddlewareFunc {
+func ReporterMiddleware(onReport func(container *Container, r *http.Request)) mux.MiddlewareFunc {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			container := &Container{}
 			newCtx := ContextWithContainer(r.Context(), container)
-			handler.ServeHTTP(w, r.WithContext(newCtx))
+			newRequest := r.WithContext(newCtx)
+			handler.ServeHTTP(w, newRequest)
+			if onReport != nil {
+				onReport(container, newRequest)
+			}
 		})
 	}
 }

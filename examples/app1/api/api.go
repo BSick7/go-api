@@ -1,6 +1,8 @@
 package app1
 
 import (
+	"net/http"
+	
 	"github.com/BSick7/go-api"
 	"github.com/BSick7/go-api/cors"
 	"github.com/BSick7/go-api/errors"
@@ -31,7 +33,9 @@ func Server() *api.Server {
 	api.DefaultFallbackBehavior(apiServer)
 	apiServer.Use(logging.EndpointLoggerMiddleware(loggingCfg))
 	apiServer.Use(gzip.Middleware())
-	apiServer.Use(errors.ReporterMiddleware())
+	apiServer.Use(errors.ReporterMiddleware(func(container *errors.Container, r *http.Request) {
+		// NOTE: An api would typically report errors here
+	}))
 	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
 	apiServer.Register(endpoints...)
