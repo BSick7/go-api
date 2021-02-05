@@ -7,6 +7,15 @@ import (
 	"time"
 )
 
+type HttpError struct {
+	StatusCode int
+	Err        error
+}
+
+func (e HttpError) Error() string {
+	return fmt.Sprintf("http error (%d): %s", e.StatusCode, e.Err)
+}
+
 type ResponseWriter struct {
 	http.ResponseWriter
 	start      time.Time

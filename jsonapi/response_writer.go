@@ -10,6 +10,15 @@ import (
 	"github.com/svanharmelen/jsonapi"
 )
 
+type HttpError struct {
+	StatusCode int
+	Errs       []*jsonapi.ErrorObject
+}
+
+func (e HttpError) Error() string {
+	return fmt.Sprintf("http error (%d): %+v", e.StatusCode, e.Errs)
+}
+
 type ResponseWriter struct {
 	http.ResponseWriter
 	start      time.Time

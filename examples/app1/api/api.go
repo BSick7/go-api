@@ -4,7 +4,9 @@ import (
 	"github.com/BSick7/go-api"
 	"github.com/BSick7/go-api/cors"
 	"github.com/BSick7/go-api/gzip"
+	"github.com/BSick7/go-api/intercept"
 	"github.com/BSick7/go-api/json"
+	"github.com/BSick7/go-api/jwt"
 	"github.com/BSick7/go-api/logging"
 	"github.com/BSick7/go-api/recovery"
 	"github.com/BSick7/go-api/standard"
@@ -12,15 +14,6 @@ import (
 )
 
 func Server() *api.Server {
-	loggingCfg := logging.Config{
-		Prefix:  "[app1]",
-		Log100s: false,
-		Log200s: false,
-		Log300s: false,
-		Log400s: false,
-		Log500s: false,
-	}
-
 	apiServer := &api.Server{
 		Router: mux.NewRouter().
 			StrictSlash(false).
@@ -28,10 +21,11 @@ func Server() *api.Server {
 			UseEncodedPath(),
 	}
 	api.DefaultFallbackBehavior(apiServer)
-	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(gzip.Middleware())
-	apiServer.Use(logging.EndpointLoggerMiddleware(loggingCfg))
+	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
+	apiServer.Use(jwt.Middleware())
+	apiServer.Use(intercept.Middleware(logging.LogAllRequests("[app1] ")))
 	apiServer.Register(endpoints...)
 	apiServer.Register(cors.Preflight())
 	return apiServer
