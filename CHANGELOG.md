@@ -1,3 +1,7 @@
+## 0.7.1 (Feb 05, 2021)
+
+* Fix busted go version.
+
 ## 0.7.0 (Feb 05, 2021)
 
 * Replaced logging middleware with `intercept.Middleware` and logging macros.
