@@ -16,4 +16,3 @@ func LogAllRequests(prefix string) intercept.OnResponseFunc {
 		stdNoTime.Printf("%s %d %s %s %s", duration, data.StatusCode(), r.Method, r.RequestURI, data.Body())
 	}
 }
-

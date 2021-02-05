@@ -1,3 +1,7 @@
+## 0.7.2 (Feb 05, 2011)
+
+* Added `logging.FallbackBehavior`.
+
 ## 0.7.1 (Feb 05, 2021)
 
 * Fix busted go version.
