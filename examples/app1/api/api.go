@@ -2,10 +2,10 @@ package app1
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/BSick7/go-api"
 	"github.com/BSick7/go-api/cors"
-	"github.com/BSick7/go-api/errors"
 	"github.com/BSick7/go-api/gzip"
 	"github.com/BSick7/go-api/json"
 	"github.com/BSick7/go-api/logging"
@@ -22,6 +22,9 @@ func Server() *api.Server {
 		Log300s: false,
 		Log400s: false,
 		Log500s: false,
+		OnRequest: func(r *http.Request, data logging.ResponseData, duration time.Duration) {
+
+		},
 	}
 
 	apiServer := &api.Server{
@@ -33,9 +36,6 @@ func Server() *api.Server {
 	api.DefaultFallbackBehavior(apiServer)
 	apiServer.Use(logging.EndpointLoggerMiddleware(loggingCfg))
 	apiServer.Use(gzip.Middleware())
-	apiServer.Use(errors.ReporterMiddleware(func(container *errors.Container, r *http.Request) {
-		// NOTE: An api would typically report errors here
-	}))
 	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
 	apiServer.Register(endpoints...)

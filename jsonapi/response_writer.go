@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/BSick7/go-api/errors"
 	"github.com/svanharmelen/jsonapi"
 )
 
@@ -22,9 +21,8 @@ func (e HttpError) Error() string {
 
 type ResponseWriter struct {
 	http.ResponseWriter
-	start        time.Time
-	statusCode   int
-	errContainer *errors.Container
+	start      time.Time
+	statusCode int
 }
 
 func (r *ResponseWriter) SendJsonApiErrors(errs []*jsonapi.ErrorObject) {
@@ -35,13 +33,6 @@ func (r *ResponseWriter) SendJsonApiErrors(errs []*jsonapi.ErrorObject) {
 	statusCode, _ := strconv.Atoi(errs[0].Code)
 	r.statusCode = statusCode
 	r.WriteHeader(statusCode)
-
-	if r.errContainer != nil {
-		r.errContainer.AddError(&HttpError{
-			StatusCode: statusCode,
-			Errs:       errs,
-		})
-	}
 
 	if err := jsonapi.MarshalErrors(r, errs); err != nil {
 		log.Printf("error marshaling jsonapi errors to response: %s (%+v)", err, errs)
