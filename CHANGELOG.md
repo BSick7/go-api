@@ -1,4 +1,8 @@
-## 0.7.2 (Feb 05, 2011)
+## 0.7.3 (Feb 08, 2021)
+
+* Fixed CORS preflight from responding with 405 (Method Not Allowed) when a route was not registered.
+
+## 0.7.2 (Feb 05, 2021)
 
 * Added `logging.FallbackBehavior`.
 
