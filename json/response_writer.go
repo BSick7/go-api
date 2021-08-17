@@ -22,10 +22,6 @@ func (r *ResponseWriter) SendError(err error) {
 		r.ResponseWriter.WriteHeader(http.StatusInternalServerError)
 	}
 
-	if iri, ok := err.(RequestIder); ok {
-		r.Header().Set("X-Request-Id", iri.RequestId())
-	}
-
 	encoder := json.NewEncoder(r.ResponseWriter)
 	encoder.Encode(err)
 }
