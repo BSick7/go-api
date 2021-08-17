@@ -2,7 +2,6 @@ package errors
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -14,7 +13,7 @@ type BadRequestError struct {
 
 func (e BadRequestError) Error() string {
 	buf := bytes.NewBufferString("")
-	fmt.Fprintf(buf, "[%s] bad request:", e.RequestId())
+	fmt.Fprint(buf, "bad request:")
 	for key, value := range e.Details {
 		fmt.Fprintf(buf, "\n  %s: %s", key, value)
 	}
@@ -25,15 +24,12 @@ func (e BadRequestError) StatusCode() int {
 	return http.StatusBadRequest
 }
 
-var _ json.Marshaler = BadRequestError{}
-
-func (e BadRequestError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"request_id": e.RequestId(),
-		"title":      "Bad Request",
-		"type":       "problems/bad-request",
-		"code":       e.StatusCode(),
-		"message":    "Your request could not be processed.",
-		"details":    e.Details,
-	})
+func (e BadRequestError) Payload() map[string]interface{} {
+	return map[string]interface{}{
+		"title":   "Bad Request",
+		"type":    "problems/bad-request",
+		"code":    e.StatusCode(),
+		"message": "Your request could not be processed.",
+		"details": e.Details,
+	}
 }

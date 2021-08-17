@@ -11,6 +11,7 @@ type ResponseWriter struct {
 	http.ResponseWriter
 	start      time.Time
 	statusCode int
+	requestId  string
 }
 
 func (r *ResponseWriter) SendError(err error) {
@@ -23,7 +24,13 @@ func (r *ResponseWriter) SendError(err error) {
 	}
 
 	encoder := json.NewEncoder(r.ResponseWriter)
-	encoder.Encode(err)
+	if payloader, ok := err.(ResponsePayloader); ok {
+		payload := payloader.Payload()
+		payload["request_id"] = r.requestId
+		encoder.Encode(payload)
+	} else {
+		encoder.Encode(err)
+	}
 }
 
 func (r *ResponseWriter) SendRawError(statusCode int, err error) {
