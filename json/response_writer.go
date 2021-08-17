@@ -3,6 +3,7 @@ package json
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/BSick7/go-api/errors"
 	"net/http"
 	"time"
 )
@@ -29,7 +30,7 @@ func (r *ResponseWriter) SendError(err error) {
 		payload["request_id"] = r.requestId
 		encoder.Encode(payload)
 	} else {
-		encoder.Encode(err)
+		encoder.Encode(errors.ApiError{Err: err})
 	}
 }
 

@@ -5,7 +5,9 @@ import (
 	"net/http"
 )
 
-type ApiError struct{}
+type ApiError struct {
+	Err error
+}
 
 func (e ApiError) Error() string {
 	return fmt.Sprintf("http error (%d)", e.StatusCode())
@@ -17,10 +19,14 @@ func (e ApiError) StatusCode() int {
 }
 
 func (e ApiError) Payload() map[string]interface{} {
+	message := "We have encountered an unexpected error."
+	if e.Err != nil {
+		message = e.Err.Error()
+	}
 	return map[string]interface{}{
 		"title":   "General Error",
 		"type":    "problems/general-error",
 		"code":    e.StatusCode(),
-		"message": "We have encountered an unexpected error.",
+		"message": message,
 	}
 }
