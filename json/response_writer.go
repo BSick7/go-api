@@ -25,13 +25,14 @@ func (r *ResponseWriter) SendError(err error) {
 	}
 
 	encoder := json.NewEncoder(r.ResponseWriter)
-	if payloader, ok := err.(ResponsePayloader); ok {
-		payload := payloader.Payload()
-		payload["request_id"] = r.requestId
-		encoder.Encode(payload)
-	} else {
-		encoder.Encode(errors.ApiError{Err: err})
+	payloader, ok := err.(ResponsePayloader)
+	if !ok {
+		payloader = errors.ApiError{Err: err}
 	}
+
+	payload := payloader.Payload()
+	payload["request_id"] = r.requestId
+	encoder.Encode(payload)
 }
 
 func (r *ResponseWriter) SendRawError(statusCode int, err error) {
