@@ -1,23 +1,24 @@
 package app1
 
 import (
-	"fmt"
-	"net/http"
-	"net/url"
-
+	"github.com/BSick7/go-api/errors"
 	"github.com/BSick7/go-api/json"
-	"github.com/pkg/errors"
+	"net/url"
 )
 
 func UrlEncodedPath(res *json.ResponseWriter, req *json.Request) {
 	path := req.Var("path")
 	if path == "" {
-		res.SendRawError(http.StatusBadRequest, fmt.Errorf("missing path"))
+		res.SendError(errors.BadRequestError{Details: map[string]string{
+			"path": "missing path",
+		}})
 		return
 	}
 	escaped, err := url.PathUnescape(path)
 	if err != nil {
-		res.SendRawError(http.StatusBadRequest, errors.Wrap(err, "invalid 'path'"))
+		res.SendError(errors.BadRequestError{Details: map[string]string{
+			"path": "invalid path",
+		}})
 		return
 	}
 	res.Send(escaped)

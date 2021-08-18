@@ -1,23 +1,21 @@
 package app1
 
 import (
-	"errors"
 	"fmt"
-	"net/http"
-	"strconv"
-
+	"github.com/BSick7/go-api/errors"
 	"github.com/BSick7/go-api/json"
+	"strconv"
 )
 
 func Simple(res *json.ResponseWriter, req *json.Request) {
 	data := req.Request.URL.Query().Get("data")
 	if data == "" {
-		res.SendRawError(http.StatusBadRequest, fmt.Errorf("missing data"))
+		res.SendError(errors.BadRequestError{Details: map[string]string{"data": "missing data"}})
 		return
 	}
 
 	if i, err := strconv.Atoi(data); err != nil {
-		res.SendRawError(http.StatusInternalServerError, errors.New("invalid syntax"))
+		res.SendError(fmt.Errorf("invalid syntax"))
 	} else {
 		res.Header().Set("Have", "data")
 		res.Send(i)
