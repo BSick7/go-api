@@ -3,12 +3,13 @@ package json
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/BSick7/go-api/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 type Tests []Test
@@ -48,31 +49,28 @@ func (e ExpectResponse) WithHeader(key, value string) ExpectResponse {
 }
 
 func (e ExpectResponse) Verify(t *testing.T, w *httptest.ResponseRecorder) {
-	if e.Code != w.Code {
-		t.Errorf("mismatched status code, got %d, want %d", w.Code, e.Code)
-	}
+	assert.Equal(t, e.Code, w.Code, "mismatched status code")
 	if e.Payload == nil {
 		// We expect nil, let's confirm there is no body
-		if w.Body != nil || w.Body.Len() > 0 {
-			t.Errorf("got response body, want empty payload")
+		if assert.NotNil(t, w.Body) {
+			assert.LessOrEqualf(t, w.Body.Len(), 0, "got response body, want empty body")
 		}
 	} else {
 		rawWant := bytes.NewBufferString("")
 		encoder := json.NewEncoder(rawWant)
-		if err := encoder.Encode(e.Payload); err != nil {
-			t.Fatalf("unexpected error marshaling expected response body: %s", err)
+		if payloader, ok := e.Payload.(ResponsePayloader); ok {
+			require.NoError(t, encoder.Encode(payloader.Payload()))
+		} else {
+			require.NoError(t, encoder.Encode(e.Payload))
 		}
-		if rawGot, err := ioutil.ReadAll(w.Body); err != nil {
-			t.Fatalf("unexpected error attempting to read response body: %s", err)
-		} else if diff := cmp.Diff(rawWant.String(), string(rawGot)); diff != "" {
-			t.Errorf("unexpected response body, (-want, +got):\n%s", diff)
-		}
+		rawGot, err := ioutil.ReadAll(w.Body)
+		require.NoError(t, err)
+		assert.Equal(t, rawWant.String(), string(rawGot), "mismatched response")
 	}
 	if e.Headers != nil {
 		for k, want := range e.Headers {
-			if got := w.Header().Get(k); got != want {
-				t.Errorf("unexpected value for header %q, wanted %q got %q", k, want, got)
-			}
+			got := w.Header().Get(k)
+			assert.Equal(t, want, got, "unexpected value in header")
 		}
 	}
 }
@@ -84,16 +82,32 @@ func ExpectOK(payload interface{}) ExpectResponse {
 	}
 }
 
-func ExpectBadRequest(message string) ExpectResponse {
+func ExpectBadRequest(details map[string]string) ExpectResponse {
 	return ExpectResponse{
 		Code:    http.StatusBadRequest,
-		Payload: Error{ErrorMessage: message},
+		Payload: errors.BadRequestError{Details: details},
 	}
 }
 
-func ExpectInternalError(message string) ExpectResponse {
+func ExpectInvalidRequest(validationErrors errors.ValidationErrors) ExpectResponse {
+	return ExpectResponse{
+		Code: http.StatusUnprocessableEntity,
+		Payload: errors.InvalidRequestError{
+			Errors: validationErrors,
+		},
+	}
+}
+
+func ExpectForbidden() ExpectResponse {
+	return ExpectResponse{
+		Code:    http.StatusForbidden,
+		Payload: errors.AuthorizationError{},
+	}
+}
+
+func ExpectInternalError(err error) ExpectResponse {
 	return ExpectResponse{
 		Code:    http.StatusInternalServerError,
-		Payload: Error{ErrorMessage: message},
+		Payload: errors.ApiError{Err: err},
 	}
 }

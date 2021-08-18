@@ -1,6 +1,7 @@
 package app1
 
 import (
+	"fmt"
 	"net/http/httptest"
 	"testing"
 
@@ -12,12 +13,12 @@ func TestSimple(t *testing.T) {
 		{
 			Name:    "missing-input",
 			Request: httptest.NewRequest("GET", "/simple", nil),
-			Want:    json.ExpectBadRequest("missing data"),
+			Want:    json.ExpectBadRequest(map[string]string{"data": "missing data"}),
 		},
 		{
 			Name:    "invalid-input",
 			Request: httptest.NewRequest("GET", "/simple?data=hey", nil),
-			Want:    json.ExpectInternalError("invalid syntax"),
+			Want:    json.ExpectInternalError(fmt.Errorf("invalid syntax")),
 		},
 		{
 			Name:    "success",

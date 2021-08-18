@@ -2,19 +2,10 @@ package json
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/BSick7/go-api/errors"
 	"net/http"
 	"time"
 )
-
-type HttpError struct {
-	StatusCode int
-	Err        error
-}
-
-func (e HttpError) Error() string {
-	return fmt.Sprintf("http error (%d): %s", e.StatusCode, e.Err)
-}
 
 type ResponseWriter struct {
 	http.ResponseWriter
@@ -22,15 +13,21 @@ type ResponseWriter struct {
 	statusCode int
 }
 
-func (r *ResponseWriter) SendError(statusCode int, err error) {
-	r.statusCode = statusCode
-	r.ResponseWriter.WriteHeader(statusCode)
-	encoder := json.NewEncoder(r.ResponseWriter)
-	encoder.Encode(map[string]interface{}{"error": err.Error()})
-}
+func (r *ResponseWriter) SendError(err error) {
+	if isc, ok := err.(StatusCoder); ok {
+		r.statusCode = isc.StatusCode()
+		r.ResponseWriter.WriteHeader(r.statusCode)
+	} else {
+		r.statusCode = http.StatusInternalServerError
+		r.ResponseWriter.WriteHeader(http.StatusInternalServerError)
+	}
 
-func (r *ResponseWriter) SendNotFound(msg string) {
-	r.SendError(http.StatusNotFound, fmt.Errorf(msg))
+	encoder := json.NewEncoder(r.ResponseWriter)
+	payloader, ok := err.(ResponsePayloader)
+	if !ok {
+		payloader = errors.ApiError{Err: err}
+	}
+	encoder.Encode(payloader.Payload())
 }
 
 func (r *ResponseWriter) Send(data interface{}) {
