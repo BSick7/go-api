@@ -59,9 +59,7 @@ func (e ExpectResponse) Verify(t *testing.T, w *httptest.ResponseRecorder) {
 		rawWant := bytes.NewBufferString("")
 		encoder := json.NewEncoder(rawWant)
 		if payloader, ok := e.Payload.(ResponsePayloader); ok {
-			pl := payloader.Payload()
-			pl["request_id"] = ""
-			require.NoError(t, encoder.Encode(pl))
+			require.NoError(t, encoder.Encode(payloader.Payload()))
 		} else {
 			require.NoError(t, encoder.Encode(e.Payload))
 		}
