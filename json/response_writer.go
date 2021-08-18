@@ -2,7 +2,6 @@ package json
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/BSick7/go-api/errors"
 	"net/http"
 	"time"
@@ -29,17 +28,6 @@ func (r *ResponseWriter) SendError(err error) {
 		payloader = errors.ApiError{Err: err}
 	}
 	encoder.Encode(payloader.Payload())
-}
-
-func (r *ResponseWriter) SendRawError(statusCode int, err error) {
-	r.statusCode = statusCode
-	r.ResponseWriter.WriteHeader(statusCode)
-	encoder := json.NewEncoder(r.ResponseWriter)
-	encoder.Encode(map[string]interface{}{"error": err.Error()})
-}
-
-func (r *ResponseWriter) SendRawNotFound(msg string) {
-	r.SendRawError(http.StatusNotFound, fmt.Errorf(msg))
 }
 
 func (r *ResponseWriter) Send(data interface{}) {
