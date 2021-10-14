@@ -35,6 +35,14 @@ func (s *Server) Use(mwf ...mux.MiddlewareFunc) {
 }
 
 func (s *Server) Launch(port int, cancelFn func()) error {
+	return s.launch(port, cancelFn, startHttp)
+}
+
+func (s *Server) LaunchTLS(port int, certFile, keyFile string, cancelFn func()) error {
+	return s.launch(port, cancelFn, startHttps(certFile, keyFile))
+}
+
+func (s *Server) launch(port int, cancelFn func(), startFn startFunc) error {
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
 		WriteTimeout: time.Duration(30) * time.Second,
@@ -56,9 +64,20 @@ func (s *Server) Launch(port int, cancelFn func()) error {
 	}()
 
 	server.ErrorLog.Printf("listening on :%d\n", port)
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+	if err := startFn(server); err != http.ErrServerClosed {
 		return err
 	}
 	server.ErrorLog.Printf("server shut down")
 	return nil
+}
+
+type startFunc func(server *http.Server) error
+
+func startHttp(server *http.Server) error {
+	return server.ListenAndServe()
+}
+func startHttps(certFile, keyFile string) startFunc {
+	return func(server *http.Server) error {
+		return server.ListenAndServeTLS(certFile, keyFile)
+	}
 }
