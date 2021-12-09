@@ -1,3 +1,19 @@
+## 0.10.1 (Dec 09, 2021)
+
+* Added `http.Hijacker` pass-through for all response writers (including `intercept.Middleware`).
+
+## 0.10.0 (Oct 14, 2021)
+
+* Added `LaunchTLS` to `Server`.
+
+## 0.9.0 (Aug 18, 2021)
+
+* Added `errors` package for default error formats.
+
+## 0.8.0 (Aug 09, 2021)
+
+* Replace panic middleware with custom and added user-supplied fn.
+
 ## 0.7.3 (Feb 08, 2021)
 
 * Fixed CORS preflight from responding with 405 (Method Not Allowed) when a route was not registered.

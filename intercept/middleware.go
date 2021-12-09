@@ -1,6 +1,9 @@
 package intercept
 
 import (
+	"bufio"
+	"fmt"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -29,11 +32,19 @@ func Middleware(onResponses ...OnResponseFunc) mux.MiddlewareFunc {
 }
 
 var _ ResponseData = &responseWriterInterceptor{}
+var _ http.Hijacker = &responseWriterInterceptor{}
 
 type responseWriterInterceptor struct {
 	http.ResponseWriter
 	statusCode   int
 	capturedData []string
+}
+
+func (w *responseWriterInterceptor) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hijacker, ok := w.ResponseWriter.(http.Hijacker); ok {
+		return hijacker.Hijack()
+	}
+	return nil, nil, fmt.Errorf("can't switch protocols using non-Hijacker ResponseWriter type %T", w.ResponseWriter)
 }
 
 func (w *responseWriterInterceptor) StatusCode() int {

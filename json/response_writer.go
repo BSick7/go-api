@@ -1,11 +1,16 @@
 package json
 
 import (
+	"bufio"
 	"encoding/json"
+	"fmt"
 	"github.com/BSick7/go-api/errors"
+	"net"
 	"net/http"
 	"time"
 )
+
+var _ http.Hijacker = &ResponseWriter{}
 
 type ResponseWriter struct {
 	http.ResponseWriter
@@ -13,16 +18,23 @@ type ResponseWriter struct {
 	statusCode int
 }
 
-func (r *ResponseWriter) SendError(err error) {
+func (w *ResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hijacker, ok := w.ResponseWriter.(http.Hijacker); ok {
+		return hijacker.Hijack()
+	}
+	return nil, nil, fmt.Errorf("can't switch protocols using non-Hijacker ResponseWriter type %T", w.ResponseWriter)
+}
+
+func (w *ResponseWriter) SendError(err error) {
 	if isc, ok := err.(StatusCoder); ok {
-		r.statusCode = isc.StatusCode()
-		r.ResponseWriter.WriteHeader(r.statusCode)
+		w.statusCode = isc.StatusCode()
+		w.ResponseWriter.WriteHeader(w.statusCode)
 	} else {
-		r.statusCode = http.StatusInternalServerError
-		r.ResponseWriter.WriteHeader(http.StatusInternalServerError)
+		w.statusCode = http.StatusInternalServerError
+		w.ResponseWriter.WriteHeader(http.StatusInternalServerError)
 	}
 
-	encoder := json.NewEncoder(r.ResponseWriter)
+	encoder := json.NewEncoder(w.ResponseWriter)
 	payloader, ok := err.(ResponsePayloader)
 	if !ok {
 		payloader = errors.ApiError{Err: err}
@@ -30,17 +42,17 @@ func (r *ResponseWriter) SendError(err error) {
 	encoder.Encode(payloader.Payload())
 }
 
-func (r *ResponseWriter) Send(data interface{}) {
+func (w *ResponseWriter) Send(data interface{}) {
 	if data == nil {
-		r.statusCode = http.StatusNoContent
-		r.ResponseWriter.WriteHeader(http.StatusNoContent)
+		w.statusCode = http.StatusNoContent
+		w.ResponseWriter.WriteHeader(http.StatusNoContent)
 	} else {
-		r.statusCode = http.StatusOK
-		encoder := json.NewEncoder(r.ResponseWriter)
+		w.statusCode = http.StatusOK
+		encoder := json.NewEncoder(w.ResponseWriter)
 		encoder.Encode(data)
 	}
 }
 
-func (r *ResponseWriter) Status() int {
-	return r.statusCode
+func (w *ResponseWriter) Status() int {
+	return w.statusCode
 }

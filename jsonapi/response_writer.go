@@ -1,8 +1,10 @@
 package jsonapi
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -19,34 +21,43 @@ func (e HttpError) Error() string {
 	return fmt.Sprintf("http error (%d): %+v", e.StatusCode, e.Errs)
 }
 
+var _ http.Hijacker = &ResponseWriter{}
+
 type ResponseWriter struct {
 	http.ResponseWriter
 	start      time.Time
 	statusCode int
 }
 
-func (r *ResponseWriter) SendJsonApiErrors(errs []*jsonapi.ErrorObject) {
+func (w *ResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hijacker, ok := w.ResponseWriter.(http.Hijacker); ok {
+		return hijacker.Hijack()
+	}
+	return nil, nil, fmt.Errorf("can't switch protocols using non-Hijacker ResponseWriter type %T", w.ResponseWriter)
+}
+
+func (w *ResponseWriter) SendJsonApiErrors(errs []*jsonapi.ErrorObject) {
 	if len(errs) < 1 {
 		return
 	}
 
 	statusCode, _ := strconv.Atoi(errs[0].Code)
-	r.statusCode = statusCode
-	r.WriteHeader(statusCode)
+	w.statusCode = statusCode
+	w.WriteHeader(statusCode)
 
-	if err := jsonapi.MarshalErrors(r, errs); err != nil {
+	if err := jsonapi.MarshalErrors(w, errs); err != nil {
 		log.Printf("error marshaling jsonapi errors to response: %s (%+v)", err, errs)
-		r.statusCode = http.StatusInternalServerError
-		http.Error(r, err.Error(), http.StatusInternalServerError)
+		w.statusCode = http.StatusInternalServerError
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func (r *ResponseWriter) SendJsonApiError(err *jsonapi.ErrorObject) {
-	r.SendJsonApiErrors([]*jsonapi.ErrorObject{err})
+func (w *ResponseWriter) SendJsonApiError(err *jsonapi.ErrorObject) {
+	w.SendJsonApiErrors([]*jsonapi.ErrorObject{err})
 }
 
-func (r *ResponseWriter) SendError(id string, statusCode int, title string, err error) {
-	r.SendJsonApiError(&jsonapi.ErrorObject{
+func (w *ResponseWriter) SendError(id string, statusCode int, title string, err error) {
+	w.SendJsonApiError(&jsonapi.ErrorObject{
 		ID:     id,
 		Title:  title,
 		Detail: err.Error(),
@@ -55,24 +66,24 @@ func (r *ResponseWriter) SendError(id string, statusCode int, title string, err 
 	})
 }
 
-func (r *ResponseWriter) SendNotFound(id string, msg string) {
-	r.SendError(id, http.StatusNotFound, "not found", fmt.Errorf(msg))
+func (w *ResponseWriter) SendNotFound(id string, msg string) {
+	w.SendError(id, http.StatusNotFound, "not found", fmt.Errorf(msg))
 }
 
-func (r *ResponseWriter) Send(data interface{}) {
+func (w *ResponseWriter) Send(data interface{}) {
 	if data == nil {
-		r.statusCode = http.StatusNoContent
-		r.ResponseWriter.WriteHeader(http.StatusNoContent)
+		w.statusCode = http.StatusNoContent
+		w.ResponseWriter.WriteHeader(http.StatusNoContent)
 	} else {
-		if err := jsonapi.MarshalPayload(r.ResponseWriter, data); err != nil {
-			r.statusCode = http.StatusInternalServerError
-			http.Error(r.ResponseWriter, err.Error(), http.StatusInternalServerError)
+		if err := jsonapi.MarshalPayload(w.ResponseWriter, data); err != nil {
+			w.statusCode = http.StatusInternalServerError
+			http.Error(w.ResponseWriter, err.Error(), http.StatusInternalServerError)
 		} else {
-			r.statusCode = http.StatusOK
+			w.statusCode = http.StatusOK
 		}
 	}
 }
 
-func (r *ResponseWriter) Status() int {
-	return r.statusCode
+func (w *ResponseWriter) Status() int {
+	return w.statusCode
 }
