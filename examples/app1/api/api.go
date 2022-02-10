@@ -25,7 +25,7 @@ func Server() *api.Server {
 	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
 	apiServer.Use(jwt.Middleware())
-	apiServer.Use(intercept.Middleware(logging.LogAllRequests("[app1] ")))
+	apiServer.Use(intercept.Middleware(false, logging.LogAllRequests("[app1] ")))
 	apiServer.Register(endpoints...)
 	apiServer.Register(cors.Preflight())
 	return apiServer

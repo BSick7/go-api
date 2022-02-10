@@ -1,3 +1,7 @@
+## 0.11.0 (Feb 10, 2022)
+
+* Added `captureBody` toggle on `intercept.Middleware` to prevent capturing body if only intercepting status code/response duration.
+
 ## 0.10.1 (Dec 09, 2021)
 
 * Added `http.Hijacker` pass-through for all response writers (including `intercept.Middleware`).
