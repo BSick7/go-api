@@ -1,3 +1,7 @@
+## 0.12.1 (Sep 14, 2022)
+
+* Added support for `errors` package in `jsonapi` package.
+
 ## 0.12.0 (Sep 14, 2022)
 
 * Aligned `SendError(error)` in `jsonapi` package with `json` package.

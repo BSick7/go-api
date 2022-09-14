@@ -61,6 +61,10 @@ type StatusCoder interface {
 	StatusCode() int
 }
 
+type ResponsePayloader interface {
+	Payload() map[string]interface{}
+}
+
 func (w *ResponseWriter) SendError(err error) {
 	var jaerr *jsonapi.ErrorObject
 	if !errors.As(err, &jaerr) {
@@ -75,12 +79,13 @@ func (w *ResponseWriter) SendError(err error) {
 			jaerr.Code = strconv.Itoa(isc.StatusCode())
 			jaerr.Status = http.StatusText(isc.StatusCode())
 		}
+		if payloader, ok := err.(ResponsePayloader); ok {
+			payload := payloader.Payload()
+			jaerr.Title = payload["title"].(string)
+			jaerr.Detail = payload["message"].(string)
+		}
 	}
 	w.SendJsonApiError(jaerr)
-}
-
-func (w *ResponseWriter) SendNotFound(id string, msg string) {
-	w.SendError(NewError(id, http.StatusNotFound, "not found", fmt.Errorf(msg)))
 }
 
 func (w *ResponseWriter) Send(data interface{}) {

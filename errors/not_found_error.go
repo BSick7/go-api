@@ -1,7 +1,6 @@
 package errors
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
 )
@@ -10,10 +9,19 @@ type NotFoundError struct {
 	ApiError
 }
 
+func NewNotFoundError(msg string) NotFoundError {
+	if msg == "" {
+		msg = "We could not find this resource."
+	}
+	return NotFoundError{
+		ApiError: ApiError{
+			Err: fmt.Errorf(msg),
+		},
+	}
+}
+
 func (e NotFoundError) Error() string {
-	buf := bytes.NewBufferString("")
-	fmt.Fprintf(buf, "not found")
-	return buf.String()
+	return e.ApiError.Error()
 }
 
 func (e NotFoundError) StatusCode() int {
@@ -25,6 +33,6 @@ func (e NotFoundError) Payload() map[string]interface{} {
 		"title":   "Resource Not Found",
 		"type":    "problems/not-found-error",
 		"code":    e.StatusCode(),
-		"message": "We could not find this resource.",
+		"message": e.Error(),
 	}
 }
