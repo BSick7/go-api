@@ -2,6 +2,7 @@ package jsonapi
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -56,18 +57,30 @@ func (w *ResponseWriter) SendJsonApiError(err *jsonapi.ErrorObject) {
 	w.SendJsonApiErrors([]*jsonapi.ErrorObject{err})
 }
 
-func (w *ResponseWriter) SendError(id string, statusCode int, title string, err error) {
-	w.SendJsonApiError(&jsonapi.ErrorObject{
-		ID:     id,
-		Title:  title,
-		Detail: err.Error(),
-		Status: http.StatusText(statusCode),
-		Code:   strconv.Itoa(statusCode),
-	})
+type StatusCoder interface {
+	StatusCode() int
+}
+
+func (w *ResponseWriter) SendError(err error) {
+	var jaerr *jsonapi.ErrorObject
+	if !errors.As(err, &jaerr) {
+		jaerr = &jsonapi.ErrorObject{
+			ID:     "",
+			Title:  "General Error",
+			Detail: err.Error(),
+			Code:   strconv.Itoa(http.StatusInternalServerError),
+			Status: http.StatusText(http.StatusInternalServerError),
+		}
+		if isc, ok := err.(StatusCoder); ok {
+			jaerr.Code = strconv.Itoa(isc.StatusCode())
+			jaerr.Status = http.StatusText(isc.StatusCode())
+		}
+	}
+	w.SendJsonApiError(jaerr)
 }
 
 func (w *ResponseWriter) SendNotFound(id string, msg string) {
-	w.SendError(id, http.StatusNotFound, "not found", fmt.Errorf(msg))
+	w.SendError(NewError(id, http.StatusNotFound, "not found", fmt.Errorf(msg)))
 }
 
 func (w *ResponseWriter) Send(data interface{}) {

@@ -1,3 +1,7 @@
+## 0.12.0 (Sep 14, 2022)
+
+* Aligned `SendError(error)` in `jsonapi` package with `json` package.
+
 ## 0.11.0 (Feb 10, 2022)
 
 * Added `captureBody` toggle on `intercept.Middleware` to prevent capturing body if only intercepting status code/response duration.
