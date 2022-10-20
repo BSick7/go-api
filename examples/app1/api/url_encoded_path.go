@@ -9,15 +9,15 @@ import (
 func UrlEncodedPath(res *json.ResponseWriter, req *json.Request) {
 	path := req.Var("path")
 	if path == "" {
-		res.SendError(errors.BadRequestError{Details: map[string]string{
-			"path": "missing path",
+		res.SendError(errors.BadRequestError{Details: []string{
+			"missing path",
 		}})
 		return
 	}
 	escaped, err := url.PathUnescape(path)
 	if err != nil {
-		res.SendError(errors.BadRequestError{Details: map[string]string{
-			"path": "invalid path",
+		res.SendError(errors.BadRequestError{Details: []string{
+			"invalid path",
 		}})
 		return
 	}

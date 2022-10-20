@@ -8,14 +8,14 @@ import (
 
 type BadRequestError struct {
 	ApiError
-	Details map[string]string
+	Details []string
 }
 
 func (e BadRequestError) Error() string {
 	buf := bytes.NewBufferString("")
 	fmt.Fprint(buf, "bad request:")
-	for key, value := range e.Details {
-		fmt.Fprintf(buf, "\n  %s: %s", key, value)
+	for _, value := range e.Details {
+		fmt.Fprintf(buf, "\n  %s", value)
 	}
 	return buf.String()
 }
