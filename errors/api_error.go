@@ -9,6 +9,10 @@ type ApiError struct {
 	Err error
 }
 
+func NewApiError(err error) ApiError {
+	return ApiError{Err: err}
+}
+
 func (e ApiError) Error() string {
 	return fmt.Sprintf("http error (%d)", e.StatusCode())
 }

@@ -11,6 +11,10 @@ type BadRequestError struct {
 	Details []string
 }
 
+func NewBadRequestError(details ...string) BadRequestError {
+	return BadRequestError{Details: details}
+}
+
 func (e BadRequestError) Error() string {
 	buf := bytes.NewBufferString("")
 	fmt.Fprint(buf, "bad request:")
