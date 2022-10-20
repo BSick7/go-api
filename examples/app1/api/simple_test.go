@@ -13,7 +13,7 @@ func TestSimple(t *testing.T) {
 		{
 			Name:    "missing-input",
 			Request: httptest.NewRequest("GET", "/simple", nil),
-			Want:    json.ExpectBadRequest(map[string]string{"data": "missing data"}),
+			Want:    json.ExpectBadRequest([]string{"missing data"}),
 		},
 		{
 			Name:    "invalid-input",

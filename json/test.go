@@ -82,7 +82,7 @@ func ExpectOK(payload interface{}) ExpectResponse {
 	}
 }
 
-func ExpectBadRequest(details map[string]string) ExpectResponse {
+func ExpectBadRequest(details []string) ExpectResponse {
 	return ExpectResponse{
 		Code:    http.StatusBadRequest,
 		Payload: errors.BadRequestError{Details: details},
