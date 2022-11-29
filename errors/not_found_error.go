@@ -21,7 +21,10 @@ func NewNotFoundError(msg string) NotFoundError {
 }
 
 func (e NotFoundError) Error() string {
-	return e.ApiError.Error()
+	if e.ApiError.Err == nil {
+		return "We could not find this resource."
+	}
+	return e.ApiError.Err.Error()
 }
 
 func (e NotFoundError) StatusCode() int {

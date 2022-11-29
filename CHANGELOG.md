@@ -1,3 +1,15 @@
+## 0.12.4 (Nov 29, 2022)
+
+* Fixed `ApiError` from hiding injected `Err`.
+
+## 0.12.3 (Oct 20, 2022)
+
+* Added `NewApiError` and `NewBadRequestError` for easier error construction.
+
+## 0.12.2 (Oct 20, 2022)
+
+* Improved formatting of `errors.BadRequestError`.
+
 ## 0.12.1 (Sep 14, 2022)
 
 * Added support for `errors` package in `jsonapi` package.

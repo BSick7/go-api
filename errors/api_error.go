@@ -14,7 +14,10 @@ func NewApiError(err error) ApiError {
 }
 
 func (e ApiError) Error() string {
-	return fmt.Sprintf("http error (%d)", e.StatusCode())
+	if e.Err == nil {
+		return fmt.Sprintf("http error (%d)", e.StatusCode())
+	}
+	return e.Err.Error()
 }
 
 func (e ApiError) StatusCode() int {
