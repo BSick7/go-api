@@ -1,3 +1,7 @@
+## 0.12.5 (Dec 16, 2022)
+
+* Reporting json encoding errors to logs when sending json response.
+
 ## 0.12.4 (Nov 29, 2022)
 
 * Fixed `ApiError` from hiding injected `Err`.

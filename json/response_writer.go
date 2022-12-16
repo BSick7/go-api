@@ -39,7 +39,9 @@ func (w *ResponseWriter) SendError(err error) {
 	if !ok {
 		payloader = errors.ApiError{Err: err}
 	}
-	encoder.Encode(payloader.Payload())
+	if err := encoder.Encode(payloader.Payload()); err != nil {
+		fmt.Printf("[go-api/json/response_writer] Error encoding error payload: %s\n", err)
+	}
 }
 
 func (w *ResponseWriter) Send(data interface{}) {
@@ -49,7 +51,9 @@ func (w *ResponseWriter) Send(data interface{}) {
 	} else {
 		w.statusCode = http.StatusOK
 		encoder := json.NewEncoder(w.ResponseWriter)
-		encoder.Encode(data)
+		if err := encoder.Encode(data); err != nil {
+			fmt.Printf("[go-api/json/response_writer] Error encoding payload: %s\n", err)
+		}
 	}
 }
 
