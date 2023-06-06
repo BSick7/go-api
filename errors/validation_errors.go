@@ -2,9 +2,15 @@ package errors
 
 import "fmt"
 
+var _ error = ValidationError{}
+
 type ValidationError struct {
-	error
 	Context string
+	Message string
+}
+
+func (ve ValidationError) Error() string {
+	return fmt.Sprintf("%s - %s", ve.Context, ve.Message)
 }
 
 var _ error = ValidationErrors{}
@@ -25,6 +31,10 @@ func (ve ValidationErrors) Error() string {
 func (ve ValidationErrors) ToJson() map[string][]string {
 	result := map[string][]string{}
 	for _, err := range ve {
+		context := err.Context
+		if context == "" {
+			context = "Base"
+		}
 		if _, ok := result[err.Context]; !ok {
 			result[err.Context] = make([]string, 0)
 		}
