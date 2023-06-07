@@ -14,7 +14,7 @@ type InvalidRequestError struct {
 func (e InvalidRequestError) Error() string {
 	buf := bytes.NewBufferString("")
 	fmt.Fprint(buf, "invalid request:")
-	for field, errs := range e.Errors.ToJson() {
+	for field, errs := range e.Errors.ToMap() {
 		fmt.Fprintf(buf, "\n  %s: %s", field, errs)
 	}
 	return buf.String()
@@ -30,6 +30,6 @@ func (e InvalidRequestError) Payload() map[string]interface{} {
 		"type":              "problems/invalid-request",
 		"code":              e.StatusCode(),
 		"message":           "Your request is invalid and could not be processed.",
-		"validation_errors": e.Errors.ToJson(),
+		"validation_errors": e.Errors.ToMap(),
 	}
 }

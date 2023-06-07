@@ -28,7 +28,7 @@ func (ve ValidationErrors) Error() string {
 	return result
 }
 
-func (ve ValidationErrors) ToJson() map[string][]string {
+func (ve ValidationErrors) ToMap() map[string][]string {
 	result := map[string][]string{}
 	for _, err := range ve {
 		context := err.Context
