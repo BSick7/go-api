@@ -38,7 +38,7 @@ func (ve ValidationErrors) ToMap() map[string][]string {
 		if _, ok := result[err.Context]; !ok {
 			result[err.Context] = make([]string, 0)
 		}
-		result[err.Context] = append(result[err.Context], err.Error())
+		result[err.Context] = append(result[err.Context], err.Message)
 	}
 	return result
 }
