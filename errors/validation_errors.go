@@ -23,7 +23,7 @@ func (ve ValidationErrors) Error() string {
 		result += "validation errors:\n"
 	}
 	for _, err := range ve {
-		result += fmt.Sprintf("\t%s %s\n", err.Context, err.Error())
+		result += fmt.Sprintf("\t%s\n", err.Error())
 	}
 	return result
 }
