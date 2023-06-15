@@ -42,3 +42,13 @@ func (ve ValidationErrors) ToMap() map[string][]string {
 	}
 	return result
 }
+
+func ValidationErrorsFromMap(m map[string][]string) ValidationErrors {
+	result := ValidationErrors{}
+	for context, messages := range m {
+		for _, message := range messages {
+			result = append(result, ValidationError{Context: context, Message: message})
+		}
+	}
+	return result
+}
