@@ -1,3 +1,7 @@
+## 0.13.0 (Jun 21, 2023)
+* Refactor `ValidationErrors` to a slice for easier interaction.
+* Added helpers to `ValidationErrors` to swap between map and slice.
+
 ## 0.12.5 (Dec 16, 2022)
 
 * Reporting json encoding errors to logs when sending json response.
