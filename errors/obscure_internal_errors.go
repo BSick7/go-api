@@ -42,17 +42,22 @@ func ContextWithObscurer(ctx context.Context, obscurer Obscurer) context.Context
 func ObscureInternalErrorsMiddleware(logOriginal bool) mux.MiddlewareFunc {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			obscurer := Obscurer{ObscureInternal: true}
-			if logOriginal {
-				logger := log.New(os.Stderr, "", 0)
-				if requestId := r.Header.Get("X-Request-ID"); requestId != "" {
-					logger.SetPrefix(fmt.Sprintf("[%s] ", requestId))
-				}
-				obscurer.LogOriginalErrorFn = func(err error) {
-					logger.Println(err.Error())
-				}
+			obscurer := Obscurer{
+				ObscureInternal:    true,
+				LogOriginalErrorFn: createErrorLogger(r, logOriginal),
 			}
 			handler.ServeHTTP(w, r.WithContext(ContextWithObscurer(r.Context(), obscurer)))
 		})
 	}
+}
+
+func createErrorLogger(r *http.Request, logOriginal bool) LogOriginalErrorFunc {
+	if !logOriginal {
+		return nil
+	}
+	logger := log.New(os.Stderr, "", 0)
+	if requestId := r.Header.Get("X-Request-ID"); requestId != "" {
+		logger.SetPrefix(fmt.Sprintf("[%s] ", requestId))
+	}
+	return func(err error) { logger.Println(err.Error()) }
 }
