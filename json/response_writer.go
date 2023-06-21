@@ -54,11 +54,12 @@ func (w *ResponseWriter) SendError(err error) {
 	// The interfaces defined in the errors package are not specific to json serialization
 	// This ResponsePayloader allows us to structure content before emitting in the json format
 	// Additionally, errors that aren't a ResponsePayloader are obscured (configurable through middleware)
-	encoder := json.NewEncoder(w.ResponseWriter)
 	payloader, ok := err.(ResponsePayloader)
 	if !ok {
 		payloader = w.Obscurer.Obscure(err)
 	}
+
+	encoder := json.NewEncoder(w.ResponseWriter)
 	if err := encoder.Encode(payloader.Payload()); err != nil {
 		fmt.Printf("[go-api/json/response_writer] Error encoding error payload: %s\n", err)
 	}

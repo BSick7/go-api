@@ -27,6 +27,7 @@ var _ http.Hijacker = &ResponseWriter{}
 
 type ResponseWriter struct {
 	http.ResponseWriter
+	Obscurer   api_errors.Obscurer
 	start      time.Time
 	statusCode int
 }
@@ -84,11 +85,18 @@ func (w *ResponseWriter) SendError(err error) {
 		if errors.As(err, &rerr) {
 			err = rerr.ResponseError()
 		}
-		if payloader, ok := err.(ResponsePayloader); ok {
-			payload := payloader.Payload()
-			jaerr.Title = payload["title"].(string)
-			jaerr.Detail = payload["message"].(string)
+
+		// The interfaces defined in the errors package are not specific to jsonapi serialization
+		// This ResponsePayloader allows us to structure content before emitting in the jsonapi format
+		// Additionally, errors that aren't a ResponsePayloader are obscured (configurable through middleware)
+		payloader, ok := err.(ResponsePayloader)
+		if !ok {
+			payloader = w.Obscurer.Obscure(err)
 		}
+
+		payload := payloader.Payload()
+		jaerr.Title = payload["title"].(string)
+		jaerr.Detail = payload["message"].(string)
 	}
 	w.SendJsonApiError(jaerr)
 }
