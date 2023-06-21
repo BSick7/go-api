@@ -3,12 +3,21 @@ package json
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/BSick7/go-api/errors"
+	api_errors "github.com/BSick7/go-api/errors"
 	"net"
 	"net/http"
 	"time"
 )
+
+type StatusCoder interface {
+	StatusCode() int
+}
+
+type ResponsePayloader interface {
+	Payload() map[string]interface{}
+}
 
 var _ http.Hijacker = &ResponseWriter{}
 
@@ -34,10 +43,15 @@ func (w *ResponseWriter) SendError(err error) {
 		w.ResponseWriter.WriteHeader(http.StatusInternalServerError)
 	}
 
+	var rerr api_errors.ResponseErrorer
+	if errors.As(err, &rerr) {
+		err = rerr.ResponseError()
+	}
+
 	encoder := json.NewEncoder(w.ResponseWriter)
 	payloader, ok := err.(ResponsePayloader)
 	if !ok {
-		payloader = errors.ApiError{Err: err}
+		payloader = api_errors.ApiError{Err: err}
 	}
 	if err := encoder.Encode(payloader.Payload()); err != nil {
 		fmt.Printf("[go-api/json/response_writer] Error encoding error payload: %s\n", err)

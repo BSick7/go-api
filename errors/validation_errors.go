@@ -1,8 +1,11 @@
 package errors
 
-import "fmt"
+import (
+	"fmt"
+)
 
 var _ error = ValidationError{}
+var _ ResponseErrorer = ValidationError{}
 
 type ValidationError struct {
 	Context string
@@ -13,7 +16,14 @@ func (ve ValidationError) Error() string {
 	return fmt.Sprintf("%s - %s", ve.Context, ve.Message)
 }
 
+func (ve ValidationError) ResponseError() error {
+	return InvalidRequestError{
+		Errors: ValidationErrors{ve},
+	}
+}
+
 var _ error = ValidationErrors{}
+var _ ResponseErrorer = ValidationErrors{}
 
 type ValidationErrors []ValidationError
 
@@ -51,4 +61,10 @@ func ValidationErrorsFromMap(m map[string][]string) ValidationErrors {
 		}
 	}
 	return result
+}
+
+func (ve ValidationErrors) ResponseError() error {
+	return InvalidRequestError{
+		Errors: ve,
+	}
 }

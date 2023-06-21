@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	api_errors "github.com/BSick7/go-api/errors"
 	"log"
 	"net"
 	"net/http"
@@ -78,6 +79,10 @@ func (w *ResponseWriter) SendError(err error) {
 		if isc, ok := err.(StatusCoder); ok {
 			jaerr.Code = strconv.Itoa(isc.StatusCode())
 			jaerr.Status = http.StatusText(isc.StatusCode())
+		}
+		var rerr api_errors.ResponseErrorer
+		if errors.As(err, &rerr) {
+			err = rerr.ResponseError()
 		}
 		if payloader, ok := err.(ResponsePayloader); ok {
 			payload := payloader.Payload()
