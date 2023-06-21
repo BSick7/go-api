@@ -1,6 +1,8 @@
 ## 0.13.0 (Jun 21, 2023)
 * Refactor `ValidationErrors` to a slice for easier interaction.
 * Added helpers to `ValidationErrors` to swap between map and slice.
+* Added `errors.ObscureInteralErrorsMiddleware` to prevent sensitive errors from reaching users.
+  * A developer can optionally log the original error message to logs.
 
 ## 0.12.5 (Dec 16, 2022)
 

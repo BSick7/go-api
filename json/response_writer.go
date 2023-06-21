@@ -3,17 +3,27 @@ package json
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/BSick7/go-api/errors"
+	api_errors "github.com/BSick7/go-api/errors"
 	"net"
 	"net/http"
 	"time"
 )
 
+type StatusCoder interface {
+	StatusCode() int
+}
+
+type ResponsePayloader interface {
+	Payload() map[string]interface{}
+}
+
 var _ http.Hijacker = &ResponseWriter{}
 
 type ResponseWriter struct {
 	http.ResponseWriter
+	Obscurer   api_errors.Obscurer
 	start      time.Time
 	statusCode int
 }
@@ -34,11 +44,22 @@ func (w *ResponseWriter) SendError(err error) {
 		w.ResponseWriter.WriteHeader(http.StatusInternalServerError)
 	}
 
-	encoder := json.NewEncoder(w.ResponseWriter)
+	// This allows a developer to emit an error that always converts into a payloader
+	// Notably, ValidationError reports as InvalidRequestError by implementing ResponseErrorer interface
+	var rerr api_errors.ResponseErrorer
+	if errors.As(err, &rerr) {
+		err = rerr.ResponseError()
+	}
+
+	// The interfaces defined in the errors package are not specific to json serialization
+	// This ResponsePayloader allows us to structure content before emitting in the json format
+	// Additionally, errors that aren't a ResponsePayloader are obscured (configurable through middleware)
 	payloader, ok := err.(ResponsePayloader)
 	if !ok {
-		payloader = errors.ApiError{Err: err}
+		payloader = w.Obscurer.Obscure(err)
 	}
+
+	encoder := json.NewEncoder(w.ResponseWriter)
 	if err := encoder.Encode(payloader.Payload()); err != nil {
 		fmt.Printf("[go-api/json/response_writer] Error encoding error payload: %s\n", err)
 	}
