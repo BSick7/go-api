@@ -3,6 +3,7 @@ package app1
 import (
 	"github.com/BSick7/go-api"
 	"github.com/BSick7/go-api/cors"
+	"github.com/BSick7/go-api/errors"
 	"github.com/BSick7/go-api/gzip"
 	"github.com/BSick7/go-api/intercept"
 	"github.com/BSick7/go-api/json"
@@ -26,6 +27,7 @@ func Server() *api.Server {
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
 	apiServer.Use(jwt.Middleware())
 	apiServer.Use(intercept.Middleware(false, logging.LogAllRequests("[app1] ")))
+	apiServer.Use(errors.ObscureInternalErrorsMiddleware(true))
 	apiServer.Register(endpoints...)
 	apiServer.Register(cors.Preflight())
 	return apiServer
