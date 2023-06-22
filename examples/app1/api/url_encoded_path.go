@@ -2,24 +2,19 @@ package app1
 
 import (
 	"github.com/BSick7/go-api/errors"
-	"github.com/BSick7/go-api/json"
+	"github.com/gorilla/mux"
+	"net/http"
 	"net/url"
 )
 
-func UrlEncodedPath(res *json.ResponseWriter, req *json.Request) {
-	path := req.Var("path")
+func UrlEncodedPath(_ http.ResponseWriter, req *http.Request) (string, error) {
+	path := mux.Vars(req)["path"]
 	if path == "" {
-		res.SendError(errors.BadRequestError{Details: []string{
-			"missing path",
-		}})
-		return
+		return "", errors.NewBadRequestError("missing path")
 	}
 	escaped, err := url.PathUnescape(path)
 	if err != nil {
-		res.SendError(errors.BadRequestError{Details: []string{
-			"invalid path",
-		}})
-		return
+		return "", errors.NewBadRequestError("invalid path")
 	}
-	res.Send(escaped)
+	return escaped, nil
 }

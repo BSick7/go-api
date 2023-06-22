@@ -34,14 +34,6 @@ func Server() *api.Server {
 }
 
 var endpoints = []api.Endpoint{
-	standard.Endpoint{
-		Method:  "GET",
-		Path:    "/simple",
-		Handler: json.Handler(Simple),
-	},
-	standard.Endpoint{
-		Method:  "GET",
-		Path:    "/paths/{path}/detail",
-		Handler: json.Handler(UrlEncodedPath),
-	},
+	standard.NewEndpoint("GET", "/simple", json.ReturnHandler(Simple)),
+	standard.NewEndpoint("GET", "/paths/{path}/detail", json.ReturnHandler(UrlEncodedPath)),
 }
