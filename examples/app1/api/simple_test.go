@@ -27,5 +27,5 @@ func TestSimple(t *testing.T) {
 			Want:    json.ExpectOK(10).WithHeader("Have", "data"),
 		},
 	}
-	tests.Run(t, Server())
+	tests.Run(t, Server(nil))
 }

@@ -12,9 +12,14 @@ import (
 	"github.com/BSick7/go-api/recovery"
 	"github.com/BSick7/go-api/standard"
 	"github.com/gorilla/mux"
+	"log/slog"
 )
 
-func Server() *api.Server {
+func Server(logger *slog.Logger) *api.Server {
+	if logger == nil {
+		logger = slog.Default()
+	}
+
 	apiServer := &api.Server{
 		Router: mux.NewRouter().
 			StrictSlash(false).
@@ -23,11 +28,11 @@ func Server() *api.Server {
 	}
 	api.DefaultFallbackBehavior(apiServer)
 	apiServer.Use(gzip.Middleware())
-	apiServer.Use(recovery.PanicMiddleware())
+	apiServer.Use(recovery.PanicMiddleware(logger))
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
 	apiServer.Use(jwt.Middleware())
-	apiServer.Use(intercept.Middleware(false, logging.LogAllRequests("[app1] ")))
-	apiServer.Use(errors.ObscureInternalErrorsMiddleware(true))
+	apiServer.Use(intercept.Middleware(false, logging.LogAllRequests(logger)))
+	apiServer.Use(errors.ObscureInternalErrorsMiddleware(logger, true))
 	apiServer.Register(endpoints...)
 	apiServer.Register(cors.Preflight())
 	return apiServer

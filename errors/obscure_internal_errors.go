@@ -2,11 +2,9 @@ package errors
 
 import (
 	"context"
-	"fmt"
 	"github.com/gorilla/mux"
-	"log"
+	"log/slog"
 	"net/http"
-	"os"
 )
 
 type obscurerContextKey struct{}
@@ -39,25 +37,24 @@ func ContextWithObscurer(ctx context.Context, obscurer Obscurer) context.Context
 	return context.WithValue(ctx, obscurerContextKey{}, obscurer)
 }
 
-func ObscureInternalErrorsMiddleware(logOriginal bool) mux.MiddlewareFunc {
+func ObscureInternalErrorsMiddleware(logger *slog.Logger, logOriginal bool) mux.MiddlewareFunc {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			obscurer := Obscurer{
 				ObscureInternal:    true,
-				LogOriginalErrorFn: createErrorLogger(r, logOriginal),
+				LogOriginalErrorFn: createErrorLogger(r, logger, logOriginal),
 			}
 			handler.ServeHTTP(w, r.WithContext(ContextWithObscurer(r.Context(), obscurer)))
 		})
 	}
 }
 
-func createErrorLogger(r *http.Request, logOriginal bool) LogOriginalErrorFunc {
+func createErrorLogger(r *http.Request, logger *slog.Logger, logOriginal bool) LogOriginalErrorFunc {
 	if !logOriginal {
 		return nil
 	}
-	logger := log.New(os.Stderr, "", 0)
 	if requestId := r.Header.Get("X-Request-ID"); requestId != "" {
-		logger.SetPrefix(fmt.Sprintf("[%s] ", requestId))
+		logger = logger.With("request_id", requestId)
 	}
-	return func(err error) { logger.Println(err.Error()) }
+	return func(err error) { logger.Error(err.Error()) }
 }

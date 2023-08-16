@@ -1,9 +1,9 @@
 package recovery
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
-	"os"
 	"runtime/debug"
 
 	"github.com/gorilla/mux"
@@ -11,13 +11,13 @@ import (
 
 type PanicRecoveryFunc func(req *http.Request, err interface{})
 
-func PanicMiddleware(fns ...PanicRecoveryFunc) mux.MiddlewareFunc {
-	panicLogger := log.New(os.Stderr, "[PANIC] ", 0)
+func PanicMiddleware(logger *slog.Logger, fns ...PanicRecoveryFunc) mux.MiddlewareFunc {
+	panicLogger := logger.With("source", "PANIC")
 	return func(next http.Handler) http.Handler {
 		return &panicRecoveryHandler{
 			next: next,
 			fn: func(req *http.Request, err interface{}) {
-				panicLogger.Println(err)
+				panicLogger.Error(fmt.Sprintf("%s", err))
 				debug.PrintStack()
 				for _, fn := range fns {
 					fn(req, err)

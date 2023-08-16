@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	apiServer := app1.Server()
+	apiServer := app1.Server(nil)
 	_, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	apiServer.Launch(8080, cancel)

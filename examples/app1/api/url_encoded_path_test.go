@@ -26,5 +26,5 @@ func TestUrlEncodedPath(t *testing.T) {
 			Want:    json.ExpectOK("http://bishopfox.com/?x=1&y1=test&z=&amp;copyright;"),
 		},
 	}
-	tests.Run(t, Server())
+	tests.Run(t, Server(nil))
 }

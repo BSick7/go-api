@@ -3,19 +3,20 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 type Server struct {
 	*mux.Router
 	Middlewares []mux.MiddlewareFunc
+	Logger      *slog.Logger
 }
 
 func (s *Server) Register(endpoints ...Endpoint) {
@@ -43,6 +44,8 @@ func (s *Server) LaunchTLS(port int, certFile, keyFile string, cancelFn func()) 
 }
 
 func (s *Server) launch(port int, cancelFn func(), startFn startFunc) error {
+	serverlog := s.Logger.With(slog.String("source", "http-server"))
+
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
 		WriteTimeout: time.Duration(30) * time.Second,
@@ -54,20 +57,20 @@ func (s *Server) launch(port int, cancelFn func(), startFn startFunc) error {
 	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		sig := <-term
-		server.ErrorLog.Printf("received %s, shutting down...\n", sig)
+		serverlog.Info(fmt.Sprintf("received %s, shutting down", sig))
 		cancelFn()
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		if err := server.Shutdown(ctx); err != nil {
-			server.ErrorLog.Printf("server did not shut down: %s\n", err)
+			serverlog.Error(fmt.Sprintf("server did not shut down: %s", err))
 		}
 	}()
 
-	server.ErrorLog.Printf("listening on :%d\n", port)
+	serverlog.Info("listening", slog.Int("port", port))
 	if err := startFn(server); err != http.ErrServerClosed {
 		return err
 	}
-	server.ErrorLog.Printf("server shut down")
+	serverlog.Info("server shut down")
 	return nil
 }
 

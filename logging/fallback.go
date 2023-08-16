@@ -1,22 +1,29 @@
 package logging
 
 import (
-	"log"
-	"net/http"
-	"os"
-	"time"
-
 	"github.com/gorilla/mux"
+	"log/slog"
+	"net/http"
+	"time"
 )
 
-func FallbackBehavior(router *mux.Router) {
-	stdNoTime := log.New(os.Stderr, "", 0)
+func FallbackBehavior(router *mux.Router, logger *slog.Logger) {
 	router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		stdNoTime.Printf("%s %d %s %s", time.Duration(0), http.StatusNotFound, r.Method, r.RequestURI)
+		logger.InfoContext(r.Context(), "not found",
+			slog.Duration("duration", time.Duration(0)),
+			slog.Int("status_code", http.StatusNotFound),
+			slog.String("method", r.Method),
+			slog.String("request_uri", r.RequestURI))
+
 		http.NotFound(w, r)
 	})
 	router.MethodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		stdNoTime.Printf("%s %d %s %s", time.Duration(0), http.StatusMethodNotAllowed, r.Method, r.RequestURI)
+		logger.InfoContext(r.Context(), "method not allowed",
+			slog.Duration("duration", time.Duration(0)),
+			slog.Int("status_code", http.StatusMethodNotAllowed),
+			slog.String("method", r.Method),
+			slog.String("request_uri", r.RequestURI))
+
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	})
 }

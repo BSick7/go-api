@@ -1,3 +1,7 @@
+# 0.14.0 (Unreleased)
+* Upgrade to go 1.21.
+* Use `log/slog` to use structured logging.
+
 # 0.13.1 (Jun 21, 2023)
 * Added `errors.ObscureInteralErrorsMiddleware` to prevent sensitive errors from reaching users.
   * A developer can optionally log the original error message to logs.
