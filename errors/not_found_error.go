@@ -31,11 +31,12 @@ func (e NotFoundError) StatusCode() int {
 	return http.StatusNotFound
 }
 
-func (e NotFoundError) Payload() map[string]interface{} {
-	return map[string]interface{}{
-		"title":   "Resource Not Found",
-		"type":    "problems/not-found-error",
-		"code":    e.StatusCode(),
-		"message": e.Error(),
+func (e NotFoundError) Payload() map[string]any {
+	return map[string]any{
+		"title":      "Resource Not Found",
+		"type":       "problems/not-found-error",
+		"code":       e.StatusCode(),
+		"message":    e.Error(),
+		"error_code": e.ErrorCode,
 	}
 }

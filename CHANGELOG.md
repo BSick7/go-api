@@ -1,3 +1,7 @@
+# 0.14.0 (Jan 24, 2024)
+* Added `ErrorCode` to `ApiError` to emit application-specific error codes.
+* Changed `BadRequestError.Details` from `[]string` to `map[string]string`
+
 # 0.13.1 (Jun 21, 2023)
 * Added `errors.ObscureInteralErrorsMiddleware` to prevent sensitive errors from reaching users.
   * A developer can optionally log the original error message to logs.

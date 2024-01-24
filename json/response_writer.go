@@ -16,7 +16,7 @@ type StatusCoder interface {
 }
 
 type ResponsePayloader interface {
-	Payload() map[string]interface{}
+	Payload() map[string]any
 }
 
 var _ http.Hijacker = &ResponseWriter{}

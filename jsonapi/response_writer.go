@@ -64,7 +64,7 @@ type StatusCoder interface {
 }
 
 type ResponsePayloader interface {
-	Payload() map[string]interface{}
+	Payload() map[string]any
 }
 
 func (w *ResponseWriter) SendError(err error) {
