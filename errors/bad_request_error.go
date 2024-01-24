@@ -8,18 +8,23 @@ import (
 
 type BadRequestError struct {
 	ApiError
-	Details []string
+
+	// Details provides specific messages and information to detail the application error
+	Details map[string]string
 }
 
-func NewBadRequestError(details ...string) BadRequestError {
-	return BadRequestError{Details: details}
+func NewBadRequestError(errorCode int, details map[string]string) BadRequestError {
+	return BadRequestError{
+		ApiError: ApiError{ErrorCode: errorCode},
+		Details:  details,
+	}
 }
 
 func (e BadRequestError) Error() string {
 	buf := bytes.NewBufferString("")
 	fmt.Fprint(buf, "bad request:")
-	for _, value := range e.Details {
-		fmt.Fprintf(buf, "\n  %s", value)
+	for key, value := range e.Details {
+		fmt.Fprintf(buf, "\n  %s = %s", key, value)
 	}
 	return buf.String()
 }
@@ -30,10 +35,11 @@ func (e BadRequestError) StatusCode() int {
 
 func (e BadRequestError) Payload() map[string]interface{} {
 	return map[string]interface{}{
-		"title":   "Bad Request",
-		"type":    "problems/bad-request",
-		"code":    e.StatusCode(),
-		"message": "Your request could not be processed.",
-		"details": e.Details,
+		"title":      "Bad Request",
+		"type":       "problems/bad-request",
+		"code":       e.StatusCode(),
+		"message":    "Your request could not be processed.",
+		"details":    e.Details,
+		"error_code": e.ErrorCode,
 	}
 }

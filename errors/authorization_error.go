@@ -20,11 +20,12 @@ func (e AuthorizationError) StatusCode() int {
 	return http.StatusForbidden
 }
 
-func (e AuthorizationError) Payload() map[string]interface{} {
-	return map[string]interface{}{
-		"title":   "Access Denied",
-		"type":    "problems/authorization-error",
-		"code":    e.StatusCode(),
-		"message": "You do not have the proper authorization to access this resource.",
+func (e AuthorizationError) Payload() map[string]any {
+	return map[string]any{
+		"title":      "Access Denied",
+		"type":       "problems/authorization-error",
+		"code":       e.StatusCode(),
+		"message":    "You do not have the proper authorization to access this resource.",
+		"error_code": e.ErrorCode,
 	}
 }

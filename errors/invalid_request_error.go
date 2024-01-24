@@ -31,5 +31,6 @@ func (e InvalidRequestError) Payload() map[string]interface{} {
 		"code":              e.StatusCode(),
 		"message":           "Your request is invalid and could not be processed.",
 		"validation_errors": e.Errors.ToMap(),
+		"error_code":        e.ErrorCode,
 	}
 }

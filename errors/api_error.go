@@ -7,10 +7,13 @@ import (
 
 type ApiError struct {
 	Err error
+
+	// ErrorCode is different from the HTTP Status Code as it represents a Nullstone-specific error code
+	ErrorCode int
 }
 
-func NewApiError(err error) ApiError {
-	return ApiError{Err: err}
+func NewApiError(err error, errorCode int) ApiError {
+	return ApiError{Err: err, ErrorCode: errorCode}
 }
 
 func (e ApiError) Error() string {
@@ -25,15 +28,16 @@ func (e ApiError) StatusCode() int {
 	return http.StatusInternalServerError
 }
 
-func (e ApiError) Payload() map[string]interface{} {
+func (e ApiError) Payload() map[string]any {
 	message := "We have encountered an unexpected error."
 	if e.Err != nil {
 		message = e.Err.Error()
 	}
-	return map[string]interface{}{
-		"title":   "General Error",
-		"type":    "problems/general-error",
-		"code":    e.StatusCode(),
-		"message": message,
+	return map[string]any{
+		"title":      "General Error",
+		"type":       "problems/general-error",
+		"code":       e.StatusCode(),
+		"message":    message,
+		"error_code": e.ErrorCode,
 	}
 }
