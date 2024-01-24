@@ -10,7 +10,7 @@ import (
 func Simple(res *json.ResponseWriter, req *json.Request) {
 	data := req.Request.URL.Query().Get("data")
 	if data == "" {
-		res.SendError(errors.BadRequestError{Details: []string{"missing data"}})
+		res.SendError(errors.NewBadRequestError(1, map[string]string{"message": "missing data"}))
 		return
 	}
 

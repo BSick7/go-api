@@ -13,7 +13,7 @@ func TestSimple(t *testing.T) {
 		{
 			Name:    "missing-input",
 			Request: httptest.NewRequest("GET", "/simple", nil),
-			Want:    json.ExpectBadRequest([]string{"missing data"}),
+			Want:    json.ExpectBadRequest(1, map[string]string{"message": "missing data"}),
 		},
 		{
 			// NOTE: This is a generic error message so it's obscured by API middleware
