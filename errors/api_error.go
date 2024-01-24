@@ -6,13 +6,13 @@ import (
 )
 
 type ApiError struct {
-	Err error
-
 	// ErrorCode is different from the HTTP Status Code as it represents a Nullstone-specific error code
 	ErrorCode int
+
+	Err error
 }
 
-func NewApiError(err error, errorCode int) ApiError {
+func NewApiError(errorCode int, err error) ApiError {
 	return ApiError{Err: err, ErrorCode: errorCode}
 }
 
