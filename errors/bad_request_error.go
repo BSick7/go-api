@@ -20,6 +20,13 @@ func NewBadRequestError(errorCode int, details map[string]string) BadRequestErro
 	}
 }
 
+func NewBadRequestMessageError(errorCode int, message string) BadRequestError {
+	return BadRequestError{
+		ApiError: ApiError{ErrorCode: errorCode},
+		Details:  map[string]string{"message": message},
+	}
+}
+
 func (e BadRequestError) Error() string {
 	buf := bytes.NewBufferString("")
 	fmt.Fprint(buf, "bad request:")
