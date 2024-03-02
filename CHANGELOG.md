@@ -1,3 +1,6 @@
+# 0.14.1 (Mar 01, 2024)
+* Added `MiddlewareChain` to create a set of middlewares without using a router. This is helpful to apply middleware to a single HTTP handler.
+
 # 0.14.0 (Jan 24, 2024)
 * Added `ErrorCode` to `ApiError` to emit application-specific error codes.
 * Changed `BadRequestError.Details` from `[]string` to `map[string]string`
