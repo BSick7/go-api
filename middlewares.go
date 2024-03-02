@@ -1,12 +1,9 @@
 package api
 
-import "net/http"
-
-type MiddlewareFunc func(http.Handler) http.Handler
-
-func (mw MiddlewareFunc) Middleware(handler http.Handler) http.Handler {
-	return mw(handler)
-}
+import (
+	"github.com/gorilla/mux"
+	"net/http"
+)
 
 type Middleware interface {
 	Middleware(handler http.Handler) http.Handler
@@ -16,7 +13,7 @@ type MiddlewareChain struct {
 	Middlewares []Middleware
 }
 
-func (c *MiddlewareChain) Use(mwf ...MiddlewareFunc) {
+func (c *MiddlewareChain) Use(mwf ...mux.MiddlewareFunc) {
 	for _, fn := range mwf {
 		c.Middlewares = append(c.Middlewares, fn)
 	}
