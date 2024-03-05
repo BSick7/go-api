@@ -1,3 +1,6 @@
+# 0.15.0 (Mar 04, 2024)
+* Reimplemented `intercept.Middleware` to use [`httpsnoop`](https://github.com/felixge/httpsnoop).
+
 # 0.14.1 (Mar 01, 2024)
 * Added `MiddlewareChain` to create a set of middlewares without using a router. This is helpful to apply middleware to a single HTTP handler.
 
