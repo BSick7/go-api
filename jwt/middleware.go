@@ -12,8 +12,8 @@ import (
 
 type tokenContextKey struct{}
 
-func ContextWithToken(ctx context.Context, claims *jwt.Token) context.Context {
-	return context.WithValue(ctx, tokenContextKey{}, claims)
+func ContextWithToken(ctx context.Context, token *jwt.Token) context.Context {
+	return context.WithValue(ctx, tokenContextKey{}, token)
 }
 
 func TokenFromContext(ctx context.Context) *jwt.Token {
@@ -26,21 +26,9 @@ func TokenFromContext(ctx context.Context) *jwt.Token {
 // Middleware parses JWT token from Authorization Bearer token
 // This middleware does *not* run JWT verification
 func Middleware() mux.MiddlewareFunc {
-	extractToken := func(r *http.Request) (*jwt.Token, error) {
-		authorization := r.Header.Get("Authorization")
-		if authorization == "" || !strings.HasPrefix(authorization, "Bearer ") {
-			return nil, nil
-		}
-		token, err := jwt.ParseString(strings.TrimPrefix(authorization, "Bearer "))
-		if err != nil {
-			return nil, err
-		}
-		return token, nil
-	}
-
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token, err := extractToken(r)
+			token, err := ExtractBearerTokenFromRequest(r)
 			if err != nil {
 				log.Printf("error reading jwt token from Authorization Bearer token: %s\n", err)
 			}
@@ -52,4 +40,16 @@ func Middleware() mux.MiddlewareFunc {
 			}
 		})
 	}
+}
+
+func ExtractBearerTokenFromRequest(r *http.Request) (*jwt.Token, error) {
+	authorization := r.Header.Get("Authorization")
+	if authorization == "" || !strings.HasPrefix(authorization, "Bearer ") {
+		return nil, nil
+	}
+	token, err := jwt.ParseString(strings.TrimPrefix(authorization, "Bearer "))
+	if err != nil {
+		return nil, err
+	}
+	return token, nil
 }

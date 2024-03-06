@@ -1,6 +1,7 @@
 package recovery
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,16 +10,33 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type PanicRecoveryFunc func(req *http.Request, err interface{})
+type PanicRecoveryFunc func(req *http.Request, err PanicError)
+
+var _ error = PanicError{}
+
+type PanicError struct {
+	stack    []byte
+	rawError interface{}
+}
+
+func (e PanicError) StackTrace() []byte {
+	return e.stack
+}
+
+func (e PanicError) Error() string {
+	if v, ok := e.rawError.(error); ok {
+		return v.Error()
+	}
+	return fmt.Sprintf("%s", e.rawError)
+}
 
 func PanicMiddleware(fns ...PanicRecoveryFunc) mux.MiddlewareFunc {
 	panicLogger := log.New(os.Stderr, "[PANIC] ", 0)
 	return func(next http.Handler) http.Handler {
 		return &panicRecoveryHandler{
 			next: next,
-			fn: func(req *http.Request, err interface{}) {
+			fn: func(req *http.Request, err PanicError) {
 				panicLogger.Println(err)
-				debug.PrintStack()
 				for _, fn := range fns {
 					fn(req, err)
 				}
@@ -36,7 +54,7 @@ func (h *panicRecoveryHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 	defer func() {
 		if err := recover(); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			h.fn(req, err)
+			h.fn(req, PanicError{rawError: err, stack: debug.Stack()})
 		}
 	}()
 	h.next.ServeHTTP(w, req)

@@ -1,3 +1,8 @@
+# 0.16.0 (Mar 06, 2024)
+* Improved `recovery.PanicMiddleware` to inject `PanicError` (adheres to `error`) instead of `interface{}`.
+* `PanicError` contains stack trace as `StackTrace() []byte`.
+* Added `jwt.ClaimsMiddleware[T]` which retrieves JWT token from request, then parses the token into custom claims.
+
 # 0.15.0 (Mar 04, 2024)
 * Reimplemented `intercept.Middleware` to use [`httpsnoop`](https://github.com/felixge/httpsnoop).
 

@@ -7,11 +7,14 @@ import (
 	"github.com/BSick7/go-api/gzip"
 	"github.com/BSick7/go-api/intercept"
 	"github.com/BSick7/go-api/json"
-	"github.com/BSick7/go-api/jwt"
+	ga_jwt "github.com/BSick7/go-api/jwt"
 	"github.com/BSick7/go-api/logging"
 	"github.com/BSick7/go-api/recovery"
 	"github.com/BSick7/go-api/standard"
+	"github.com/cristalhq/jwt/v3"
 	"github.com/gorilla/mux"
+	"log"
+	"net/http"
 )
 
 func Server() *api.Server {
@@ -25,12 +28,17 @@ func Server() *api.Server {
 	apiServer.Use(gzip.Middleware())
 	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
-	apiServer.Use(jwt.Middleware())
-	apiServer.Use(intercept.Middleware(false, logging.LogAllRequests("[app1] ")))
+	apiServer.Use(ga_jwt.ClaimsMiddleware[jwt.StandardClaims](handleJwtError))
+	apiServer.Use(intercept.Middleware(logging.LogAllRequests("[app1] ")))
 	apiServer.Use(errors.ObscureInternalErrorsMiddleware(true))
 	apiServer.Register(endpoints...)
 	apiServer.Register(cors.Preflight())
 	return apiServer
+}
+
+func handleJwtError(w http.ResponseWriter, r *http.Request, err error) bool {
+	log.Println("handleJwtError", err.Error())
+	return true
 }
 
 var endpoints = []api.Endpoint{
