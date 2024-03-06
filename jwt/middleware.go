@@ -28,7 +28,7 @@ func TokenFromContext(ctx context.Context) *jwt.Token {
 func Middleware() mux.MiddlewareFunc {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token, err := extractBearerTokenFromRequest(r)
+			token, err := ExtractBearerTokenFromRequest(r)
 			if err != nil {
 				log.Printf("error reading jwt token from Authorization Bearer token: %s\n", err)
 			}
@@ -42,7 +42,7 @@ func Middleware() mux.MiddlewareFunc {
 	}
 }
 
-func extractBearerTokenFromRequest(r *http.Request) (*jwt.Token, error) {
+func ExtractBearerTokenFromRequest(r *http.Request) (*jwt.Token, error) {
 	authorization := r.Header.Get("Authorization")
 	if authorization == "" || !strings.HasPrefix(authorization, "Bearer ") {
 		return nil, nil

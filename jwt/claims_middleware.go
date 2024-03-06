@@ -29,21 +29,19 @@ func ClaimsFromContext[T any](ctx context.Context) *T {
 type ErrorHandlerFunc func(w http.ResponseWriter, r *http.Request, err error) bool
 
 func ClaimsMiddleware[T any](errorHandler ErrorHandlerFunc) mux.MiddlewareFunc {
-	reportError := func(w http.ResponseWriter, r *http.Request, err error) bool {
-		if errorHandler == nil {
+	if errorHandler == nil {
+		errorHandler = func(w http.ResponseWriter, r *http.Request, err error) bool {
 			log.Println(err.Error())
 			return true
-		} else {
-			return errorHandler(w, r, err)
 		}
 	}
 
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token, err := extractBearerTokenFromRequest(r)
+			token, err := ExtractBearerTokenFromRequest(r)
 			if err != nil {
 				innerErr := fmt.Errorf("error reading jwt token from Authorization Bearer token: %s", err)
-				if !reportError(w, r, innerErr) {
+				if !errorHandler(w, r, innerErr) {
 					return
 				}
 			}
@@ -56,10 +54,10 @@ func ClaimsMiddleware[T any](errorHandler ErrorHandlerFunc) mux.MiddlewareFunc {
 			ctx := r.Context()
 			ctx = ContextWithToken(ctx, token)
 
-			claims, err := parseClaims[T](token)
+			claims, err := ParseClaims[T](token)
 			if err != nil {
 				innerErr := fmt.Errorf("error parsing claims from jwt token: %s", err)
-				if !reportError(w, r, innerErr) {
+				if !errorHandler(w, r, innerErr) {
 					return
 				}
 			}
@@ -72,7 +70,7 @@ func ClaimsMiddleware[T any](errorHandler ErrorHandlerFunc) mux.MiddlewareFunc {
 	}
 }
 
-func parseClaims[T any](token *jwt.Token) (*T, error) {
+func ParseClaims[T any](token *jwt.Token) (*T, error) {
 	var claims T
 	if err := json.Unmarshal(token.RawClaims(), &claims); err != nil {
 		return nil, err
