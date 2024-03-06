@@ -28,6 +28,11 @@ func ClaimsFromContext[T any](ctx context.Context) *T {
 // Return true to continue the request
 type ErrorHandlerFunc func(w http.ResponseWriter, r *http.Request, err error) bool
 
+// ClaimsMiddleware extracts the JWT token from `Authorization: Bearer <token>` HTTP header.
+// The token is parsed into custom claims defined by the type constraint `T` defined on the function.
+// The token is available via `TokenFromContext(r.Context())`.
+// The claims are available via `ClaimsFromContext(r.Context())`.j
+// An optional errorHandler can be used to perform another action instead of logging when the token/claims fail.
 func ClaimsMiddleware[T any](errorHandler ErrorHandlerFunc) mux.MiddlewareFunc {
 	if errorHandler == nil {
 		errorHandler = func(w http.ResponseWriter, r *http.Request, err error) bool {
