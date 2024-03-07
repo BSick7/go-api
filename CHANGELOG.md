@@ -1,3 +1,8 @@
+# 0.16.1 (Mar 07, 2024)
+* Added `errors.CaptureMiddleware` to report API errors.
+* Added macros to `errors` for creating path/querystring/payload parse errors.
+* Added request parsers that automate parsing and error wrapping.
+
 # 0.16.0 (Mar 06, 2024)
 * Improved `recovery.PanicMiddleware` to inject `PanicError` (adheres to `error`) instead of `interface{}`.
 * `PanicError` contains stack trace as `StackTrace() []byte`.

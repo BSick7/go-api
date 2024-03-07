@@ -27,9 +27,10 @@ var _ http.Hijacker = &ResponseWriter{}
 
 type ResponseWriter struct {
 	http.ResponseWriter
-	Obscurer   api_errors.Obscurer
-	start      time.Time
-	statusCode int
+	Obscurer      api_errors.Obscurer
+	ErrorCapturer api_errors.OnCaptureFunc
+	start         time.Time
+	statusCode    int
 }
 
 func (w *ResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
@@ -52,11 +53,13 @@ func (w *ResponseWriter) SendJsonApiErrors(errs []*jsonapi.ErrorObject) {
 		log.Printf("error marshaling jsonapi errors to response: %s (%+v)", err, errs)
 		w.statusCode = http.StatusInternalServerError
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.ErrorCapturer(w.statusCode, err)
 	}
 }
 
 func (w *ResponseWriter) SendJsonApiError(err *jsonapi.ErrorObject) {
 	w.SendJsonApiErrors([]*jsonapi.ErrorObject{err})
+	w.ErrorCapturer(w.statusCode, err)
 }
 
 type StatusCoder interface {

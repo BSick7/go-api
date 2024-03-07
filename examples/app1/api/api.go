@@ -28,6 +28,9 @@ func Server() *api.Server {
 	apiServer.Use(gzip.Middleware())
 	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
+	apiServer.Use(errors.CaptureMiddleware(func(r *http.Request, statusCode int, err error) {
+		log.Printf("captured api error [code = %d, err = %s]\n", statusCode, err)
+	}))
 	apiServer.Use(ga_jwt.ClaimsMiddleware[jwt.StandardClaims](handleJwtError))
 	apiServer.Use(intercept.Middleware(logging.LogAllRequests("[app1] ")))
 	apiServer.Use(errors.ObscureInternalErrorsMiddleware(true))
