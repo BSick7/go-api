@@ -3,6 +3,7 @@ package request
 import (
 	"fmt"
 	"github.com/BSick7/go-api/errors"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -10,6 +11,16 @@ import (
 	"strings"
 	"time"
 )
+
+func UuidPathParameter(r *http.Request, name string) (uuid.UUID, error) {
+	vars := mux.Vars(r)
+	val, err := uuid.Parse(vars[name])
+	if err != nil {
+		log.Printf("%s is not a valid uuid: %s\n", name, err)
+		return uuid.Nil, errors.InvalidPathParameter(name, fmt.Sprintf("%s must be a uuid", name))
+	}
+	return val, nil
+}
 
 func Int64PathParameter(r *http.Request, name string) (int64, error) {
 	vars := mux.Vars(r)

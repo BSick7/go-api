@@ -8,6 +8,7 @@ const (
 	ErrorCodeInvalidPathParameter  = 10000
 	ErrorCodeInvalidQueryParameter = 10001
 	ErrorCodeInvalidPayload        = 10002
+	ErrorCodeRequiredField         = 10003
 )
 
 func InvalidPathParameter(part string, message string) BadRequestError {
@@ -31,6 +32,20 @@ func InvalidPayload(err error) BadRequestError {
 		"message": fmt.Sprintf("invalid payload: %s", err),
 	}
 	return NewBadRequestError(ErrorCodeInvalidPayload, details)
+}
+
+func RequiredPathParameter(part string) BadRequestError {
+	details := map[string]string{
+		"message": fmt.Sprintf("%s is required", part),
+	}
+	return NewBadRequestError(ErrorCodeRequiredField, details)
+}
+
+func RequiredPayloadField(field string) BadRequestError {
+	details := map[string]string{
+		"message": fmt.Sprintf("%s is required", field),
+	}
+	return NewBadRequestError(ErrorCodeRequiredField, details)
 }
 
 func InvalidPayloadAttribute(attribute string, message string) BadRequestError {
