@@ -16,6 +16,7 @@ func Handler(handler HandlerFunc) http.Handler {
 			ResponseWriter: w,
 			start:          time.Now(),
 			Obscurer:       errors.ObscurerFromContext(r.Context()),
+			ErrorCapturer:  errors.CapturerFromContext(r.Context()),
 		}
 		req := &Request{Request: r}
 		handler(res, req)

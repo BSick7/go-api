@@ -23,9 +23,10 @@ var _ http.Hijacker = &ResponseWriter{}
 
 type ResponseWriter struct {
 	http.ResponseWriter
-	Obscurer   api_errors.Obscurer
-	start      time.Time
-	statusCode int
+	Obscurer      api_errors.Obscurer
+	ErrorCapturer api_errors.OnCaptureFunc
+	start         time.Time
+	statusCode    int
 }
 
 func (w *ResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
@@ -63,6 +64,7 @@ func (w *ResponseWriter) SendError(err error) {
 	if err := encoder.Encode(payloader.Payload()); err != nil {
 		fmt.Printf("[go-api/json/response_writer] Error encoding error payload: %s\n", err)
 	}
+	w.ErrorCapturer(w.statusCode, err)
 }
 
 func (w *ResponseWriter) Send(data interface{}) {
