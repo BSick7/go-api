@@ -36,7 +36,7 @@ func PanicMiddleware(fns ...PanicRecoveryFunc) mux.MiddlewareFunc {
 		return &panicRecoveryHandler{
 			next: next,
 			fn: func(req *http.Request, err PanicError) {
-				panicLogger.Println(err)
+				panicLogger.Println(err, string(err.StackTrace()))
 				for _, fn := range fns {
 					fn(req, err)
 				}

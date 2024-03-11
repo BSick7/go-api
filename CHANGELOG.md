@@ -1,3 +1,6 @@
+# 0.17.1 (Mar 11, 2024)
+* PanicMiddleware prints stack trace to stderr.
+
 # 0.17.0 (Mar 11, 2024)
 * Configured `http.Server` with no timeouts.
 * Added `AdjustServerFn` to `api.Server` that allows configuration of the underlying `http.Server`.
