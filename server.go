@@ -15,7 +15,8 @@ import (
 
 type Server struct {
 	*mux.Router
-	Middlewares []mux.MiddlewareFunc
+	Middlewares    []mux.MiddlewareFunc
+	AdjustServerFn func(s *http.Server)
 }
 
 func (s *Server) Register(endpoints ...Endpoint) {
@@ -43,13 +44,14 @@ func (s *Server) LaunchTLS(port int, certFile, keyFile string, cancelFn func()) 
 }
 
 func (s *Server) launch(port int, cancelFn func(), startFn startFunc) error {
-	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", port),
-		WriteTimeout: time.Duration(30) * time.Second,
-		ReadTimeout:  time.Duration(30) * time.Second,
-		ErrorLog:     log.New(os.Stdout, "[http-server] ", 0),
-		Handler:      s,
+	server := &http.Server{}
+	if s.AdjustServerFn != nil {
+		s.AdjustServerFn(server)
 	}
+	server.Addr = fmt.Sprintf(":%d", port)
+	server.ErrorLog = log.New(os.Stdout, "[http-server] ", 0)
+	server.Handler = s
+
 	term := make(chan os.Signal, 1)
 	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
 	go func() {

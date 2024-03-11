@@ -1,3 +1,7 @@
+# 0.17.0 (Mar 11, 2024)
+* Configured `http.Server` with no timeouts.
+* Added `AdjustServerFn` to `api.Server` that allows configuration of the underlying `http.Server`.
+
 # 0.16.1 (Mar 07, 2024)
 * Added `errors.CaptureMiddleware` to report API errors.
 * Added macros to `errors` for creating path/querystring/payload parse errors.
