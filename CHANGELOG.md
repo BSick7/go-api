@@ -1,3 +1,6 @@
+# 0.17.2 (Apr 02, 2024)
+* PanicMiddleware no longer writes response code (to avoid panic from duplicate write).
+
 # 0.17.1 (Mar 11, 2024)
 * PanicMiddleware prints stack trace to stderr.
 

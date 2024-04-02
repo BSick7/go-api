@@ -53,7 +53,6 @@ type panicRecoveryHandler struct {
 func (h *panicRecoveryHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
 			h.fn(req, PanicError{rawError: err, stack: debug.Stack()})
 		}
 	}()
