@@ -42,10 +42,10 @@ func Int64QueryParam(r *http.Request, name string) (int64, error) {
 	return val, nil
 }
 
-func OptionalInt64QueryParam(r *http.Request, name string) (*int64, error) {
+func OptionalIntQueryParam(r *http.Request, name string) (*int, error) {
 	q := r.URL.Query()
 	if val := q.Get(name); val != "" {
-		val, err := strconv.ParseInt(q.Get(name), 10, 64)
+		val, err := strconv.Atoi(q.Get(name))
 		if err != nil {
 			log.Printf("%s is not a valid int64: %s\n", name, err)
 			return nil, errors.InvalidQueryParameter(name, fmt.Sprintf("%s must be an integer", name))
