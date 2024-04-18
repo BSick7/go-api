@@ -42,6 +42,19 @@ func Int64QueryParam(r *http.Request, name string) (int64, error) {
 	return val, nil
 }
 
+func OptionalInt64QueryParam(r *http.Request, name string) (*int64, error) {
+	q := r.URL.Query()
+	if val := q.Get(name); val != "" {
+		val, err := strconv.ParseInt(q.Get(name), 10, 64)
+		if err != nil {
+			log.Printf("%s is not a valid int64: %s\n", name, err)
+			return nil, errors.InvalidQueryParameter(name, fmt.Sprintf("%s must be an integer", name))
+		}
+		return &val, nil
+	}
+	return nil, nil
+}
+
 func StringSliceQueryParam(r *http.Request, name string) []string {
 	q := r.URL.Query()
 	if val := q.Get(name); val != "" {
