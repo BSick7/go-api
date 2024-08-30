@@ -26,7 +26,7 @@ func Server() *api.Server {
 			UseEncodedPath(),
 	}
 	api.DefaultFallbackBehavior(apiServer)
-	apiServer.Use(logging.AddLogger())
+	apiServer.Use(logging.AddLogger(nil))
 	apiServer.Use(gzip.Middleware())
 	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))

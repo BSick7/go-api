@@ -26,10 +26,22 @@ func ContextWithLogger(ctx context.Context, logger *slog.Logger) context.Context
 	return context.WithValue(ctx, contextKey{}, logger)
 }
 
-func AddLogger() mux.MiddlewareFunc {
+// AddLogger adds slog.Logger to all requests
+// This logger is initialized with slogHandler
+// If slogHandler is nil, a default slog.TextHandler is created with:
+// - The "time" attribute is removed
+// - For each request, the following fields are added to the logger:
+//   - scheme
+//   - method
+//   - path
+//   - x-request-id (if header exists)
+func AddLogger(slogHandler slog.Handler) mux.MiddlewareFunc {
+	if slogHandler == nil {
+		slogHandler = slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{ReplaceAttr: removeKeys(slog.TimeKey)})
+	}
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{ReplaceAttr: removeKeys(slog.TimeKey)}))
+			logger := slog.New(slogHandler)
 			logger = logger.With(
 				slog.String("scheme", detectScheme(r)),
 				slog.String("method", r.Method),
