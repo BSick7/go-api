@@ -1,3 +1,8 @@
+# 0.18.0 (Aug 30, 2024)
+* Switch to standard `slog` package for logging.
+* Added a `slog.Logger` to `http.Request.Context()`.
+* Added a `slog.Logger` to `json.Request`.
+
 # 0.17.2 (Apr 02, 2024)
 * PanicMiddleware no longer writes response code (to avoid panic from duplicate write).
 

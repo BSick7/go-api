@@ -2,15 +2,17 @@ package logging
 
 import (
 	"github.com/BSick7/go-api/intercept"
-	"log"
+	"log/slog"
 	"net/http"
-	"os"
 )
 
-func LogAllRequests(prefix string) intercept.OnResponseFunc {
-	stdNoTime := log.New(os.Stderr, prefix, 0)
-
+func LogAllRequests() intercept.OnResponseFunc {
 	return func(r *http.Request, data intercept.ResponseData) {
-		stdNoTime.Printf("%s %d %s %s", data.Duration, data.StatusCode, r.Method, r.RequestURI)
+		logger := LoggerFromContext(r.Context())
+		logger = logger.With(
+			slog.Int("status-code", data.StatusCode),
+			slog.Duration("duration", data.Duration),
+		)
+		logger.Info("completed")
 	}
 }

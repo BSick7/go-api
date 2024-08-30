@@ -2,9 +2,9 @@ package recovery
 
 import (
 	"fmt"
-	"log"
+	"github.com/BSick7/go-api/logging"
+	"log/slog"
 	"net/http"
-	"os"
 	"runtime/debug"
 
 	"github.com/gorilla/mux"
@@ -31,12 +31,16 @@ func (e PanicError) Error() string {
 }
 
 func PanicMiddleware(fns ...PanicRecoveryFunc) mux.MiddlewareFunc {
-	panicLogger := log.New(os.Stderr, "[PANIC] ", 0)
 	return func(next http.Handler) http.Handler {
 		return &panicRecoveryHandler{
 			next: next,
 			fn: func(req *http.Request, err PanicError) {
-				panicLogger.Println(err, string(err.StackTrace()))
+				logger := logging.LoggerFromContext(req.Context())
+				logger = logger.With(
+					slog.String("panic", "PANIC"),
+					slog.String("stack-trace", string(err.StackTrace())),
+				)
+				logger.Error(err.Error())
 				for _, fn := range fns {
 					fn(req, err)
 				}

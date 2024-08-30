@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -66,7 +67,7 @@ func (s *Server) launch(port int, cancelFn func(), startFn startFunc) error {
 	}()
 
 	server.ErrorLog.Printf("listening on :%d\n", port)
-	if err := startFn(server); err != http.ErrServerClosed {
+	if err := startFn(server); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 	server.ErrorLog.Printf("server shut down")

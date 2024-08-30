@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -11,6 +12,7 @@ import (
 
 type Request struct {
 	*http.Request
+	Logger *slog.Logger
 }
 
 func (r *Request) Var(key string) string {

@@ -14,6 +14,7 @@ import (
 	"github.com/cristalhq/jwt/v3"
 	"github.com/gorilla/mux"
 	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -25,14 +26,16 @@ func Server() *api.Server {
 			UseEncodedPath(),
 	}
 	api.DefaultFallbackBehavior(apiServer)
+	apiServer.Use(logging.AddLogger())
 	apiServer.Use(gzip.Middleware())
 	apiServer.Use(recovery.PanicMiddleware())
 	apiServer.Use(cors.Middleware(cors.DefaultSettings))
 	apiServer.Use(errors.CaptureMiddleware(func(r *http.Request, statusCode int, err error) {
-		log.Printf("captured api error [code = %d, err = %s]\n", statusCode, err)
+		logger := logging.LoggerFromContext(r.Context())
+		logger.Info("captured api error", slog.String("error", err.Error()))
 	}))
 	apiServer.Use(ga_jwt.ClaimsMiddleware[jwt.StandardClaims](handleJwtError))
-	apiServer.Use(intercept.Middleware(logging.LogAllRequests("[app1] ")))
+	apiServer.Use(intercept.Middleware(logging.LogAllRequests()))
 	apiServer.Use(errors.ObscureInternalErrorsMiddleware(true))
 	apiServer.Register(endpoints...)
 	apiServer.Register(cors.Preflight())
