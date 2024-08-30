@@ -2,6 +2,7 @@ package json
 
 import (
 	"github.com/BSick7/go-api/errors"
+	"github.com/BSick7/go-api/logging"
 	"net/http"
 	"time"
 )
@@ -17,7 +18,10 @@ func Handler(handler HandlerFunc) http.Handler {
 			Obscurer:       errors.ObscurerFromContext(r.Context()),
 			ErrorCapturer:  errors.CapturerFromContext(r.Context()),
 		}
-		req := &Request{Request: r}
+		req := &Request{
+			Request: r,
+			Logger:  logging.LoggerFromContext(r.Context()),
+		}
 		handler(res, req)
 	})
 }

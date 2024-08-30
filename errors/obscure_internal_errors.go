@@ -2,11 +2,9 @@ package errors
 
 import (
 	"context"
-	"fmt"
+	"github.com/BSick7/go-api/logging"
 	"github.com/gorilla/mux"
-	"log"
 	"net/http"
-	"os"
 )
 
 type obscurerContextKey struct{}
@@ -55,9 +53,8 @@ func createErrorLogger(r *http.Request, logOriginal bool) LogOriginalErrorFunc {
 	if !logOriginal {
 		return nil
 	}
-	logger := log.New(os.Stderr, "", 0)
-	if requestId := r.Header.Get("X-Request-ID"); requestId != "" {
-		logger.SetPrefix(fmt.Sprintf("[%s] ", requestId))
+	logger := logging.LoggerFromContext(r.Context())
+	return func(err error) {
+		logger.Error(err.Error())
 	}
-	return func(err error) { logger.Println(err.Error()) }
 }
