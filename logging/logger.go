@@ -8,6 +8,10 @@ import (
 	"os"
 )
 
+const (
+	IdHeader = "X-Request-Id"
+)
+
 type contextKey struct{}
 
 func LoggerFromContext(ctx context.Context) *slog.Logger {
@@ -26,6 +30,14 @@ func AddLogger() mux.MiddlewareFunc {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{ReplaceAttr: removeKeys(slog.TimeKey)}))
+			logger = logger.With(
+				slog.String("scheme", r.URL.Scheme),
+				slog.String("method", r.Method),
+				slog.String("path", r.URL.Path),
+			)
+			if requestId := r.Header.Get(IdHeader); requestId != "" {
+				logger = logger.With(slog.String("x-request-id", requestId))
+			}
 			req := r.WithContext(ContextWithLogger(r.Context(), logger))
 			handler.ServeHTTP(w, req)
 		})
