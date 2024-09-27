@@ -1,3 +1,6 @@
+# 0.18.1 (Sep 27, 2024)
+* Use github.com/google/go-cmp to test response body.
+
 # 0.18.0 (Aug 30, 2024)
 * Switch to standard `slog` package for logging.
 * Added a `slog.Logger` to `http.Request.Context()`.
