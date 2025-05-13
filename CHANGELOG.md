@@ -1,3 +1,7 @@
+# 0.18.2 (May 13, 2025)
+* Added support for `jsonapi` `links` and `meta` for list responses.
+* Upgraded to latest `github.com/hashicorp/jsonapi` package.
+
 # 0.18.1 (Sep 27, 2024)
 * Use github.com/google/go-cmp to test response body.
 

@@ -9,8 +9,8 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
+	github.com/hashicorp/jsonapi v1.5.0
 	github.com/stretchr/testify v1.7.0
-	github.com/svanharmelen/jsonapi v0.0.0-20180618144545-0c0828c3f16d
 	github.com/xi2/httpgzip v0.0.0-20190509075255-932ab5e254ae
 )
 

@@ -1,7 +1,7 @@
 package jsonapi
 
 import (
-	"github.com/svanharmelen/jsonapi"
+	"github.com/hashicorp/jsonapi"
 	"net/http"
 	"strconv"
 )

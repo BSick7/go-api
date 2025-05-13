@@ -2,7 +2,7 @@ package jsonapi
 
 import (
 	"github.com/BSick7/go-api/errors"
-	"github.com/svanharmelen/jsonapi"
+	"github.com/hashicorp/jsonapi"
 	"net/http"
 	"time"
 )

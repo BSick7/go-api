@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/svanharmelen/jsonapi"
+	"github.com/hashicorp/jsonapi"
 )
 
 type Request struct {

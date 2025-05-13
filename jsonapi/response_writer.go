@@ -2,16 +2,16 @@ package jsonapi
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	api_errors "github.com/BSick7/go-api/errors"
+	"github.com/hashicorp/jsonapi"
 	"log"
 	"net"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/svanharmelen/jsonapi"
 )
 
 type HttpError struct {
@@ -104,17 +104,69 @@ func (w *ResponseWriter) SendError(err error) {
 	w.SendJsonApiError(jaerr)
 }
 
+// DataDecorator allows you to emit `links` and `meta` along with your payload
+// This is useful for things like adding pagination metadata to a list response
+// To do things like this, implement jsonapi.Metable (for `meta`) and jsonapi.Linkable (for `links`)
+type DataDecorator interface {
+	Data() any
+}
+
 func (w *ResponseWriter) Send(data interface{}) {
 	if data == nil {
 		w.statusCode = http.StatusNoContent
 		w.ResponseWriter.WriteHeader(http.StatusNoContent)
 	} else {
-		if err := jsonapi.MarshalPayload(w.ResponseWriter, data); err != nil {
-			w.statusCode = http.StatusInternalServerError
-			http.Error(w.ResponseWriter, err.Error(), http.StatusInternalServerError)
+		if decorator, ok := data.(DataDecorator); ok {
+			w.sendDecorated(decorator)
 		} else {
-			w.statusCode = http.StatusOK
+			w.sendNormal(data)
 		}
+	}
+}
+
+func (w *ResponseWriter) sendNormal(data any) {
+	if err := jsonapi.MarshalPayload(w.ResponseWriter, data); err != nil {
+		w.statusCode = http.StatusInternalServerError
+		http.Error(w.ResponseWriter, err.Error(), http.StatusInternalServerError)
+	} else {
+		w.statusCode = http.StatusOK
+	}
+}
+
+func (w *ResponseWriter) sendDecorated(decorator DataDecorator) {
+	payload, err := jsonapi.Marshal(decorator.Data())
+	if err != nil {
+		w.statusCode = http.StatusInternalServerError
+		http.Error(w.ResponseWriter, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	linkable, isLinkable := decorator.(jsonapi.Linkable)
+	metable, isMetable := decorator.(jsonapi.Metable)
+	if manyPayload, ok := payload.(*jsonapi.ManyPayload); ok {
+		if isLinkable {
+			manyPayload.Links = linkable.JSONAPILinks()
+		}
+		if isMetable {
+			manyPayload.Meta = metable.JSONAPIMeta()
+		}
+		payload = manyPayload
+	}
+	if onePayload, ok := payload.(*jsonapi.OnePayload); ok {
+		if isLinkable {
+			onePayload.Links = linkable.JSONAPILinks()
+		}
+		if isMetable {
+			onePayload.Meta = metable.JSONAPIMeta()
+		}
+		payload = onePayload
+	}
+
+	if err := json.NewEncoder(w.ResponseWriter).Encode(payload); err != nil {
+		w.statusCode = http.StatusInternalServerError
+		http.Error(w.ResponseWriter, err.Error(), http.StatusInternalServerError)
+	} else {
+		w.statusCode = http.StatusOK
 	}
 }
 
