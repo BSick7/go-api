@@ -1,3 +1,7 @@
+# 0.18.3 (Aug 15, 2025)
+* Added `request.ExtractScheme` to retrieve the request scheme, taking into account headers.
+* Added `request.ExtractHost` to retrieve request hostname, taking into account headers.
+
 # 0.18.2 (May 13, 2025)
 * Added support for `jsonapi` `links` and `meta` for list responses.
 * Upgraded to latest `github.com/hashicorp/jsonapi` package.
