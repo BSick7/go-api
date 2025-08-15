@@ -43,8 +43,9 @@ func AddLogger(slogHandler slog.Handler) mux.MiddlewareFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			logger := slog.New(slogHandler)
 			logger = logger.With(
-				slog.String("scheme", detectScheme(r)),
 				slog.String("method", r.Method),
+				slog.String("scheme", ExtractScheme(r)),
+				slog.String("host", ExtractHost(r)),
 				slog.String("path", r.URL.Path),
 			)
 			if requestId := r.Header.Get(IdHeader); requestId != "" {
@@ -65,26 +66,4 @@ func removeKeys(keys ...string) func([]string, slog.Attr) slog.Attr {
 		}
 		return a
 	}
-}
-
-func detectScheme(r *http.Request) string {
-	isTls := r.TLS != nil
-
-	// Check for WebSocket upgrade request
-	if r.Header.Get("Connection") == "Upgrade" && r.Header.Get("Upgrade") == "websocket" {
-		if isTls {
-			return "wss"
-		}
-		return "ws"
-	}
-
-	// If behind a proxy, check for X-Forwarded-Proto header
-	if proto := r.Header.Get("X-Forwarded-Proto"); proto != "" {
-		return proto
-	}
-
-	if isTls {
-		return "https "
-	}
-	return "http"
 }
