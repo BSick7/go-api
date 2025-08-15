@@ -1,4 +1,4 @@
-package request
+package logging
 
 import (
 	"net/http"
@@ -8,6 +8,14 @@ import (
 // ExtractScheme returns the protocol used by the client
 // This considers reverse proxy headers and falls back to request characteristics
 func ExtractScheme(r *http.Request) string {
+	// Check for WebSocket upgrade request
+	if r.Header.Get("Connection") == "Upgrade" && r.Header.Get("Upgrade") == "websocket" {
+		if r.TLS != nil {
+			return "wss"
+		}
+		return "ws"
+	}
+
 	// Prefer Forwarded if available
 	if fwd := r.Header.Get("Forwarded"); fwd != "" {
 		for _, part := range strings.Split(fwd, ";") {
