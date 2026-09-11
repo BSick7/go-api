@@ -2,7 +2,7 @@ package cors
 
 var DefaultSettings = Settings{
 	AllowedOrigins: []string{"*"},
-	AllowedMethods: []string{"OPTIONS", "HEAD", "GET", "POST", "PUT", "DELETE"},
+	AllowedMethods: []string{"OPTIONS", "HEAD", "GET", "POST", "PATCH", "PUT", "DELETE"},
 	AllowedHeaders: []string{
 		"Content-Type",
 		"Content-Length",

@@ -1,3 +1,6 @@
+# 0.18.4 (Sep 11, 2026)
+* Include `PATCH` in default allowed methods for CORS.
+
 # 0.18.3 (Aug 15, 2025)
 * Added `host` to structured logging attributes.
 * Improved `scheme` in structured logging attributes to parse `Forwarded` HTTP header.
